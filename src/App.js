@@ -31,14 +31,6 @@ function App() {
         if (auth.currentUser) {
             return (
                 <>
-                    <Switch>
-                        <Route exact path='/'>
-                            <HomePage auth={auth} profile={profile} />
-                        </Route>
-                        <Route path='/jogo/:gameId'>
-                            <GamePage auth={auth} profile={profile} />
-                        </Route>
-                    </Switch>
                     <AppBar position='sticky'>
                         <Toolbar>
                             <Button color='inherit' onClick={() => pageHistory.push('/')}>
@@ -50,19 +42,19 @@ function App() {
                             </Button>
                         </Toolbar>
                     </AppBar>
+                    <Switch>
+                        <Route exact path='/'>
+                            <HomePage auth={auth} profile={profile} pageHistory={pageHistory} />
+                        </Route>
+                        <Route path='/jogo/:gameId'>
+                            <GamePage auth={auth} profile={profile} pageHistory={pageHistory} />
+                        </Route>
+                    </Switch>
                 </>
             );
         } else {
             return (
                 <>
-                    <Switch>
-                        <Route exact path='/registrar'>
-                            <RegisterPage auth={auth} />
-                        </Route>
-                        <Route>
-                            <LoginPage auth={auth} />
-                        </Route>
-                    </Switch>
                     <AppBar position='sticky'>
                         <Toolbar>
                             <Button color='inherit' onClick={() => pageHistory.push('/')}>
@@ -70,6 +62,14 @@ function App() {
                             </Button>
                         </Toolbar>
                     </AppBar>
+                    <Switch>
+                        <Route exact path='/registrar'>
+                            <RegisterPage auth={auth} pageHistory={pageHistory} />
+                        </Route>
+                        <Route path='/'>
+                            <LoginPage auth={auth} pageHistory={pageHistory} />
+                        </Route>
+                    </Switch>
                 </>
             );
         };

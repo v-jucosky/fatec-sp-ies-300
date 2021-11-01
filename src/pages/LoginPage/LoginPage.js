@@ -4,7 +4,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Container, Typography, Button, TextField } from '@material-ui/core';
 import { Alert, AlertTitle } from '@material-ui/lab';
 
-function LoginPage({ auth }) {
+function LoginPage({ auth, pageHistory }) {
     const [formData, setFormData] = useState({
         email: '',
         password: '',
