@@ -49,7 +49,7 @@ function RegisterPage({ auth, pageHistory }) {
                     <Typography gutterBottom variant='h4'>
                         Registrar
                     </Typography>
-                    <Typography gutterBottom variant='subtitle1'>
+                    <Typography gutterBottom variant='subtitle1' style={{ marginBottom: 16 }}>
                         Preencha o formulário abaixo para se registrar
                     </Typography>
                     {Object.keys(formData.validationErrors).map(code => {
