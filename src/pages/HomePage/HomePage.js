@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { doc, addDoc, deleteDoc, onSnapshot, serverTimestamp, collection, query, where } from 'firebase/firestore';
 import { Container, Typography, Button, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
+import { Delete, PlayArrow } from '@material-ui/icons';
 
 import { database } from '../../utils/settings/firebase';
 
@@ -21,8 +22,8 @@ function HomePage({ auth, profile, pageHistory }) {
         return unsubscribe;
     }, []);
 
-    async function createGame() {
-        const document = await addDoc(collection(database, 'games'), {
+    function createGame() {
+        addDoc(collection(database, 'games'), {
             owner: auth.currentUser.uid,
             currentPlayer: auth.currentUser.uid,
             players: [
@@ -34,13 +35,13 @@ function HomePage({ auth, profile, pageHistory }) {
             createTimestamp: serverTimestamp(),
             running: false,
             open: true
+        }).then(document => {
+            enterGame(document.id);
         });
-
-        enterGame(document.id);
     };
 
-    async function deleteGame(id) {
-        await deleteDoc(doc(database, 'games', id));
+    function deleteGame(id) {
+        deleteDoc(doc(database, 'games', id));
     };
 
     function enterGame(id) {
@@ -83,10 +84,10 @@ function HomePage({ auth, profile, pageHistory }) {
                                         </TableCell>
                                         <TableCell>
                                             <Button size='small' variant='contained' color='primary' disabled={!game.open || game.running} onClick={() => enterGame(game.id)} style={{ marginRight: 16 }}>
-                                                Continuar
+                                                <PlayArrow />
                                             </Button>
                                             <Button size='small' variant='contained' color='secondary' onClick={() => deleteGame(game.id)}>
-                                                Excluir
+                                                <Delete />
                                             </Button>
                                         </TableCell>
                                     </TableRow>

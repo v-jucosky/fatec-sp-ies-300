@@ -19,15 +19,15 @@ function RegisterPage({ auth, pageHistory }) {
         event.preventDefault();
 
         createUserWithEmailAndPassword(auth, formData.email, formData.password)
-            .then(async user => {
-                await addDoc(collection(database, 'profiles'), {
+            .then(user => {
+                addDoc(collection(database, 'profiles'), {
                     user: user.user.uid,
                     displayName: formData.displayName,
                     registerTimestamp: serverTimestamp(),
                     superUser: false
+                }).then(document => {
+                    pageHistory.push('/');
                 });
-
-                pageHistory.push('/');
             })
             .catch(error => {
                 setFormData({ ...formData, validationErrors: { ...formData.validationErrors, [error.code]: error } });

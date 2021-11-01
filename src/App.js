@@ -3,6 +3,7 @@ import { Switch, Route, useHistory } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 import { getDocs, query, collection, where } from 'firebase/firestore';
 import { AppBar, Toolbar, Button, Container } from '@material-ui/core';
+import { Home } from '@material-ui/icons';
 
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -34,7 +35,7 @@ function App() {
                     <AppBar position='sticky'>
                         <Toolbar>
                             <Button color='inherit' onClick={() => pageHistory.push('/')}>
-                                Dominó
+                                <Home />
                             </Button>
                             <Container style={{ flexGrow: 1 }} />
                             <Button color='inherit' onClick={() => signOut(auth)}>
@@ -58,7 +59,7 @@ function App() {
                     <AppBar position='sticky'>
                         <Toolbar>
                             <Button color='inherit' onClick={() => pageHistory.push('/')}>
-                                Dominó
+                                <Home />
                             </Button>
                         </Toolbar>
                     </AppBar>
