@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, addDoc, getDoc, setDoc, updateDoc, onSnapshot, arrayUnion, arrayRemove, collection, getDocs, query, where } from 'firebase/firestore';
+import { doc, addDoc, getDoc, setDoc, updateDoc, onSnapshot, arrayUnion, arrayRemove, collection, query, increment, serverTimestamp } from 'firebase/firestore';
 import { Container, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, CardContent, CardActions } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
@@ -89,14 +89,18 @@ function GamePage({ auth, profile, pageHistory }) {
             });
         });
 
-        setDoc(doc(database, 'games', gameId, 'moves', '0'), {
-            ...getTileFromSleep(sleep)
+        addDoc(collection(database, 'games', gameId, 'moves'), {
+            move: 1,
+            player: auth.currentUser.uid,
+            tile: getTileFromSleep(sleep),
+            onTimestamp: serverTimestamp()
         });
 
         updateDoc(doc(database, 'games', gameId), {
             sleep: sleep,
             open: false,
-            running: true
+            running: true,
+            moveCount: increment(1)
         });
     };
 
@@ -110,16 +114,20 @@ function GamePage({ auth, profile, pageHistory }) {
             nextPlayer = game.players[currentPlayer + 1];
         };
 
-        updateDoc(doc(database, 'games', gameId), {
-            currentPlayer: nextPlayer
+        addDoc(collection(database, 'games', gameId, 'moves'), {
+            move: game.moveCount + 1,
+            player: auth.currentUser.uid,
+            tile: tile,
+            onTimestamp: serverTimestamp()
         });
 
         updateDoc(doc(database, 'games', gameId, 'decks', auth.currentUser.uid), {
             tiles: arrayRemove(tile)
         });
 
-        addDoc(collection(database, 'games', gameId, 'moves'), {
-            ...tile
+        updateDoc(doc(database, 'games', gameId), {
+            moveCount: increment(1),
+            currentPlayer: nextPlayer
         });
     };
 
@@ -201,8 +209,8 @@ function GamePage({ auth, profile, pageHistory }) {
                 {moves.map(move => {
                     return (
                         <ButtonGroup color='primary' variant='contained' style={{ marginRight: 16, marginBottom: 16 }}>
-                            <Button>{move.leftString}</Button>
-                            <Button>{move.rightString}</Button>
+                            <Button>{move.tile.leftString}</Button>
+                            <Button>{move.tile.rightString}</Button>
                         </ButtonGroup>
                     );
                 })}
