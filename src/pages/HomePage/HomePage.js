@@ -13,7 +13,7 @@ function HomePage({ auth, profile, pageHistory }) {
     });
 
     useEffect(() => {
-        const unsubscribe = onSnapshot(query(collection(database, 'games'), where('owner', '==', auth.currentUser.uid)), snapshot => {
+        const unsubscribe = onSnapshot(query(collection(database, 'games'), where('players', 'array-contains', auth.currentUser.uid)), snapshot => {
             snapshot.docChanges()
                 .forEach(change => {
                     if (change.type === 'added') {
@@ -90,7 +90,7 @@ function HomePage({ auth, profile, pageHistory }) {
                                             <Button size='small' variant='contained' color='primary' disabled={!(game.open || game.running)} onClick={() => enterGame(game.id)} style={{ marginRight: 16 }}>
                                                 <PlayArrow />
                                             </Button>
-                                            <Button size='small' variant='contained' color='secondary' onClick={() => deleteGame(game.id)}>
+                                            <Button size='small' variant='contained' color='secondary' disabled={game.owner !== auth.currentUser.uid} onClick={() => deleteGame(game.id)}>
                                                 <Delete />
                                             </Button>
                                         </TableCell>

@@ -29,11 +29,11 @@ function GamePage({ auth, profile, pageHistory }) {
                     let players = document.data().players;
 
                     if (!players.includes(auth.currentUser.uid)) {
-                        if (players.length > PLAYER_LIMIT) {
+                        if (players.length >= PLAYER_LIMIT) {
                             alert('Número máximo de jogadores atingido');
                             pageHistory.push('/');
                         } else {
-                            updateDoc(document, {
+                            updateDoc(doc(database, 'games', gameId), {
                                 players: arrayUnion(auth.currentUser.uid)
                             });
                         };
