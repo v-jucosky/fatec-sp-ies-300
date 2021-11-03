@@ -1,32 +1,36 @@
 import React, { useEffect, useState } from 'react';
 import { Switch, Route, useHistory } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
-import { getDocs, query, collection, where } from 'firebase/firestore';
+import { getDoc, doc } from 'firebase/firestore';
 import { AppBar, Toolbar, Button, Container } from '@material-ui/core';
 import { Home } from '@material-ui/icons';
 
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
+import ProfilePage from './pages/ProfilePage';
 import GamePage from './pages/GamePage/GamePage';
 import { firebaseApp, database } from './utils/settings/firebase';
 
 function App() {
     const auth = getAuth(firebaseApp);
     const pageHistory = useHistory();
-    const [profile, setProfile] = useState();
+    const [profile, setProfile] = useState({});
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async user => {
+        const unsubscribe = onAuthStateChanged(auth, user => {
             if (user) {
-                const documents = await getDocs(query(collection(database, 'profiles'), where('user', '==', auth.currentUser.uid)));
-
-                setProfile(documents.docs[0].data());
+                getDoc(doc(database, 'profiles', auth.currentUser.uid))
+                    .then(document => {
+                        setProfile(document);
+                    });
+            } else {
+                setProfile({});
             };
         });
 
         return unsubscribe;
-    }, [auth]);
+    }, []);
 
     function getMainContent() {
         if (auth.currentUser) {
@@ -38,6 +42,9 @@ function App() {
                                 <Home />
                             </Button>
                             <Container style={{ flexGrow: 1 }} />
+                            <Button color='inherit' onClick={() => pageHistory.push('/perfil')} style={{ marginRight: 16 }}>
+                                Perfil
+                            </Button>
                             <Button color='inherit' onClick={() => signOut(auth)}>
                                 Sair
                             </Button>
@@ -46,6 +53,9 @@ function App() {
                     <Switch>
                         <Route exact path='/'>
                             <HomePage auth={auth} profile={profile} pageHistory={pageHistory} />
+                        </Route>
+                        <Route exact path='/perfil'>
+                            <ProfilePage auth={auth} profile={profile} setProfile={setProfile} pageHistory={pageHistory} />
                         </Route>
                         <Route path='/jogo/:gameId'>
                             <GamePage auth={auth} profile={profile} pageHistory={pageHistory} />

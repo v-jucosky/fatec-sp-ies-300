@@ -10,13 +10,14 @@ function HomePage({ auth, profile, pageHistory }) {
 
     useEffect(() => {
         const unsubscribe = onSnapshot(query(collection(database, 'games'), where('owner', '==', auth.currentUser.uid)), snapshot => {
-            snapshot.docChanges().forEach(change => {
-                if (change.type === 'added') {
-                    setGames(documents => [...documents, { id: change.doc.id, ...change.doc.data() }]);
-                } else if (change.type === 'removed') {
-                    setGames(documents => documents.filter(game => game.id !== change.doc.id));
-                };
-            });
+            snapshot.docChanges()
+                .forEach(change => {
+                    if (change.type === 'added') {
+                        setGames(content => [...content, { id: change.doc.id, ...change.doc.data() }]);
+                    } else if (change.type === 'removed') {
+                        setGames(content => content.filter(game => game.id !== change.doc.id));
+                    };
+                });
         });
 
         return unsubscribe;
@@ -29,9 +30,8 @@ function HomePage({ auth, profile, pageHistory }) {
             players: [
                 auth.currentUser.uid
             ],
-            moves: [],
             sleep: [],
-            decks: {},
+            moveCount: 0,
             createTimestamp: serverTimestamp(),
             running: false,
             open: true
@@ -40,64 +40,60 @@ function HomePage({ auth, profile, pageHistory }) {
         });
     };
 
-    function deleteGame(id) {
-        deleteDoc(doc(database, 'games', id));
+    function deleteGame(gameId) {
+        deleteDoc(doc(database, 'games', gameId));
     };
 
-    function enterGame(id) {
-        pageHistory.push('/jogo/' + id);
+    function enterGame(gameId) {
+        pageHistory.push('/jogo/' + gameId);
     };
 
     return (
-        <>
-            <Container maxWidth='md'>
-                <div style={{ marginTop: 64 }}>
-                    <Typography gutterBottom variant='h4'>
-                        Bem vindo, {profile.displayName}
-                    </Typography>
-                    <Button variant='contained' color='primary' onClick={() => createGame()} style={{ marginBottom: 16 }}>
-                        Criar jogo
-                    </Button>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
+        <Container maxWidth='md' style={{ marginTop: 64 }}>
+            <Typography gutterBottom variant='h4'>
+                Bem vindo, {profile.data().displayName}
+            </Typography>
+            <Button variant='contained' color='primary' onClick={() => createGame()} style={{ marginBottom: 16 }}>
+                Criar jogo
+            </Button>
+            <Table>
+                <TableHead>
+                    <TableRow>
+                        <TableCell>
+                            ID do jogo
+                        </TableCell>
+                        <TableCell>
+                            Jogadores
+                        </TableCell>
+                        <TableCell>
+                            Ações
+                        </TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {games.map(game => {
+                        return (
+                            <TableRow key={game.id}>
                                 <TableCell>
-                                    ID do jogo
+                                    {game.id}
                                 </TableCell>
                                 <TableCell>
-                                    Jogadores
+                                    {game.players.length}
                                 </TableCell>
                                 <TableCell>
-                                    Ações
+                                    <Button size='small' variant='contained' color='primary' disabled={!(game.open || game.running)} onClick={() => enterGame(game.id)} style={{ marginRight: 16 }}>
+                                        <PlayArrow />
+                                    </Button>
+                                    <Button size='small' variant='contained' color='secondary' onClick={() => deleteGame(game.id)}>
+                                        <Delete />
+                                    </Button>
                                 </TableCell>
                             </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {games.map(game => {
-                                return (
-                                    <TableRow key={game.id}>
-                                        <TableCell>
-                                            {game.id}
-                                        </TableCell>
-                                        <TableCell>
-                                            {game.players.length}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Button size='small' variant='contained' color='primary' disabled={!game.open || game.running} onClick={() => enterGame(game.id)} style={{ marginRight: 16 }}>
-                                                <PlayArrow />
-                                            </Button>
-                                            <Button size='small' variant='contained' color='secondary' onClick={() => deleteGame(game.id)}>
-                                                <Delete />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })}
-                        </TableBody>
-                    </Table>
-                </div>
-            </Container>
-        </>
+                        );
+                    })}
+                </TableBody>
+            </Table>
+        </Container>
     );
 };
 
