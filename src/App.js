@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Switch, Route, useHistory } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 import { getDoc, doc } from 'firebase/firestore';
-import { AppBar, Toolbar, Button, Container } from '@material-ui/core';
+import { AppBar, Toolbar, Button, Container, IconButton } from '@material-ui/core';
 import { Home } from '@material-ui/icons';
 
 import LoginPage from './pages/LoginPage';
@@ -38,9 +38,9 @@ function App() {
                 <>
                     <AppBar position='sticky'>
                         <Toolbar>
-                            <Button color='inherit' onClick={() => pageHistory.push('/')}>
+                            <IconButton color='inherit' onClick={() => pageHistory.push('/')}>
                                 <Home />
-                            </Button>
+                            </IconButton>
                             <Container style={{ flexGrow: 1 }} />
                             <Button color='inherit' onClick={() => pageHistory.push('/perfil')} style={{ marginRight: 16 }}>
                                 Perfil
@@ -68,9 +68,9 @@ function App() {
                 <>
                     <AppBar position='sticky'>
                         <Toolbar>
-                            <Button color='inherit' onClick={() => pageHistory.push('/')}>
+                            <IconButton color='inherit' onClick={() => pageHistory.push('/')}>
                                 <Home />
-                            </Button>
+                            </IconButton>
                         </Toolbar>
                     </AppBar>
                     <Switch>

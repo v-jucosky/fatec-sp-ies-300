@@ -25,17 +25,22 @@ function GamePage({ auth, profile, pageHistory }) {
     useEffect(() => {
         getDoc(doc(database, 'games', gameId))
             .then(document => {
-                let players = document.data().players;
+                try {
+                    let players = document.data().players;
 
-                if (!players.includes(auth.currentUser.uid)) {
-                    if (players.length > PLAYER_LIMIT) {
-                        alert('Número máximo de jogadores atingido');
-                        pageHistory.push('/');
-                    } else {
-                        updateDoc(document, {
-                            players: arrayUnion(auth.currentUser.uid)
-                        });
+                    if (!players.includes(auth.currentUser.uid)) {
+                        if (players.length > PLAYER_LIMIT) {
+                            alert('Número máximo de jogadores atingido');
+                            pageHistory.push('/');
+                        } else {
+                            updateDoc(document, {
+                                players: arrayUnion(auth.currentUser.uid)
+                            });
+                        };
                     };
+                } catch (error) {
+                    alert('Não foi possível entrar neste jogo');
+                    pageHistory.push('/');
                 };
             });
 
@@ -171,7 +176,7 @@ function GamePage({ auth, profile, pageHistory }) {
                             </Typography>
                         </CardContent>
                         <CardActions>
-                            <Button color='primary' variant='contained' onClick={() => startGame()} disabled={!game.open}>
+                            <Button color='primary' onClick={() => startGame()} disabled={!game.open}>
                                 Iniciar jogo
                             </Button>
                         </CardActions>
