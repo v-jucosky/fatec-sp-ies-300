@@ -47,6 +47,7 @@ function LoginPage({ auth, pageHistory }) {
                 <TextField
                     required
                     fullWidth
+                    autoFocus
                     id='email'
                     label='E-mail'
                     variant='outlined'

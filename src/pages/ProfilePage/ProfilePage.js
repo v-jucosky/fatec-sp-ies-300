@@ -35,6 +35,7 @@ function ProfilePage({ auth, profile, setProfile, pageHistory }) {
                 <TextField
                     required
                     fullWidth
+                    autoFocus
                     id='displayName'
                     label='Apelido'
                     variant='outlined'
