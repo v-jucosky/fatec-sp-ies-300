@@ -8,7 +8,7 @@ import { buildSleep, getTileFromSleep, DECK_MAXIMUM_SIZE, PLAYER_LIMIT } from '.
 
 function GamePage({ auth, profile, pageHistory }) {
     const { gameId } = useParams();
-    const [players, setPlayers] = useState([]);
+    const [players, setPlayers] = useState([{ userId: profile.id, ...profile.data() }]);
     const [moves, setMoves] = useState([]);
     const [deck, setDeck] = useState({});
     const [game, setGame] = useState({
@@ -26,11 +26,14 @@ function GamePage({ auth, profile, pageHistory }) {
         getDoc(doc(database, 'games', gameId))
             .then(document => {
                 try {
-                    let players = document.data().players;
+                    let game = document.data();
 
-                    if (!players.includes(auth.currentUser.uid)) {
-                        if (players.length >= PLAYER_LIMIT) {
-                            alert('Número máximo de jogadores atingido');
+                    if (!game.players.includes(auth.currentUser.uid)) {
+                        if (!game.open) {
+                            alert('Este jogo não está aberto.');
+                            pageHistory.push('/');
+                        } else if (game.players.length >= PLAYER_LIMIT) {
+                            alert('Número máximo de jogadores atingido.');
                             pageHistory.push('/');
                         } else {
                             updateDoc(doc(database, 'games', gameId), {
@@ -39,20 +42,20 @@ function GamePage({ auth, profile, pageHistory }) {
                         };
                     };
                 } catch (error) {
-                    alert('Não foi possível entrar neste jogo');
+                    alert('Não foi possível entrar neste jogo.');
                     pageHistory.push('/');
                 };
             });
 
         const unsubscribeGame = onSnapshot(doc(database, 'games', gameId), snapshot => {
             let game = snapshot.data();
-            let existingPlayers = players.map(player => player.user);
+            let existingPlayers = players.map(player => player.userId);
             let newPlayers = game.players.filter(player => !existingPlayers.includes(player));
 
-            newPlayers.forEach(player => {
-                getDoc(doc(database, 'profiles', player))
+            newPlayers.forEach(newPlayer => {
+                getDoc(doc(database, 'profiles', newPlayer))
                     .then(document => {
-                        setPlayers(content => [...content, document.data()]);
+                        setPlayers(content => [content, { userId: document.id, ...document.data() }]);
                     });
             });
 
@@ -170,12 +173,13 @@ function GamePage({ auth, profile, pageHistory }) {
                                 Painel do administrador
                             </Typography>
                             <Typography gutterBottom>
-                                Este painel só é visível a você, {profile.data().displayName}, por ter iniciado o jogo.
-                                <br />
-                                Quando todos os jogadores entrarem, clique em “Iniciar jogo” para iniciar a partida.
+                                Este painel só é visível a você, {profile.data().displayName}, por ter iniciado o jogo. Quando todos os jogadores entrarem, clique em “Iniciar jogo” para iniciar a partida.
                             </Typography>
                         </CardContent>
                         <CardActions>
+                            <Button color='primary' onClick={() => navigator.clipboard.writeText(gameId)}>
+                                Copiar ID
+                            </Button>
                             <Button color='primary' onClick={() => startGame()} disabled={!game.open}>
                                 Iniciar jogo
                             </Button>
@@ -189,7 +193,7 @@ function GamePage({ auth, profile, pageHistory }) {
                         </Typography>
                         {!deck?.tiles &&
                             <Typography gutterBottom>
-                                Você receberá suas peças aqui quando o administrador do jogo iniciar a partida...
+                                Você receberá suas peças aqui quando o administrador do jogo iniciar a partida.
                             </Typography>
                         }
                         {deck?.tiles &&
@@ -202,7 +206,7 @@ function GamePage({ auth, profile, pageHistory }) {
                         <CardActions>
                             {deck.tiles.map(tile => {
                                 return (
-                                    <ButtonGroup color='primary' variant='contained' onClick={() => moveTile(tile)}>
+                                    <ButtonGroup color='primary' disabled={game.currentPlayer !== auth.currentUser.uid} onClick={() => moveTile(tile)}>
                                         <Button>{tile.leftString}</Button>
                                         <Button>{tile.rightString}</Button>
                                     </ButtonGroup>

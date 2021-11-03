@@ -29,7 +29,7 @@ function ProfilePage({ auth, profile, setProfile, pageHistory }) {
                 Perfil
             </Typography>
             <Typography gutterBottom variant='subtitle1' style={{ marginBottom: 16 }}>
-                Atualize seu perfil
+                Atualize seu perfil.
             </Typography>
             <form noValidate autoComplete='off' style={{ marginBottom: 16 }}>
                 <TextField

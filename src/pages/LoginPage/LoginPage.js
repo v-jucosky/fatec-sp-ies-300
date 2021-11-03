@@ -34,12 +34,12 @@ function LoginPage({ auth, pageHistory }) {
                 Login
             </Typography>
             <Typography gutterBottom variant='subtitle1' style={{ marginBottom: 16 }}>
-                Realize o login para poder jogar ou registre-se
+                Realize o login para poder jogar ou registre-se.
             </Typography>
             {Object.keys(formData.validationErrors).map(errorCode => {
                 return (
                     <Alert severity='error' onClose={() => closeAlert(errorCode)} style={{ marginBottom: 16 }}>
-                        Ocorreu um erro ao processar sua solicitação ({errorCode})
+                        Ocorreu um erro ao processar sua solicitação ({errorCode}).
                     </Alert>
                 );
             })}

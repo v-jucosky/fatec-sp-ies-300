@@ -45,12 +45,12 @@ function RegisterPage({ auth, pageHistory }) {
                 Registrar
             </Typography>
             <Typography gutterBottom variant='subtitle1' style={{ marginBottom: 16 }}>
-                Preencha o formulário abaixo para se registrar
+                Preencha o formulário abaixo para se registrar.
             </Typography>
             {Object.keys(formData.validationErrors).map(errorCode => {
                 return (
                     <Alert severity='error' onClose={() => closeAlert(errorCode)} style={{ marginBottom: 16 }}>
-                        Ocorreu um erro ao processar sua solicitação ({errorCode})
+                        Ocorreu um erro ao processar sua solicitação ({errorCode}).
                     </Alert>
                 );
             })}
