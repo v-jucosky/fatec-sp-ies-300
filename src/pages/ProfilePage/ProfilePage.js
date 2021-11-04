@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { updateDoc, doc, serverTimestamp } from '@firebase/firestore';
-import { Container, Typography, Button, TextField, Select, MenuItem } from '@material-ui/core';
+import { Container, Typography, Button, TextField, MenuItem } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
 import { themePalette } from '../../utils/shared/game';
@@ -45,7 +45,7 @@ function ProfilePage({ auth, profile, pageHistory }) {
                     onChange={(event) => setFormData({ ...formData, displayName: event.target.value })}
                     style={{ marginBottom: 16 }}
                 />
-                <Select required fullWidth id='palettePrimaryMain' variant='outlined' value={formData.palette.primary.main} onChange={(event) => setFormData({ ...formData, palette: { ...formData.palette, primary: { main: event.target.value } } })} style={{ marginBottom: 16 }}>
+                <TextField select required fullWidth id='palettePrimaryMain' label='Cor de destaque' variant='outlined' value={formData.palette.primary.main} onChange={(event) => setFormData({ ...formData, palette: { ...formData.palette, primary: { main: event.target.value } } })} style={{ marginBottom: 16 }}>
                     {themePalette.map(palette => {
                         return (
                             <MenuItem value={palette.code}>
@@ -53,7 +53,7 @@ function ProfilePage({ auth, profile, pageHistory }) {
                             </MenuItem>
                         );
                     })}
-                </Select>
+                </TextField>
                 <TextField
                     disabled
                     fullWidth
