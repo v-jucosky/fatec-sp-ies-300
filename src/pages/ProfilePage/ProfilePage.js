@@ -1,25 +1,26 @@
 import React, { useState } from 'react';
-import { updateDoc, doc, getDoc } from '@firebase/firestore';
-import { Container, Typography, Button, TextField } from '@material-ui/core';
+import { updateDoc, doc } from '@firebase/firestore';
+import { Container, Typography, Button, TextField, Select, MenuItem } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
+import { themePalette } from '../../utils/shared/game';
 
-function ProfilePage({ auth, profile, setProfile, pageHistory }) {
+function ProfilePage({ auth, profile, pageHistory }) {
     const [formData, setFormData] = useState({
-        displayName: profile.data().displayName
+        displayName: profile.displayName,
+        registerTimestamp: profile.registerTimestamp,
+        palette: profile.palette,
+        validationErrors: {}
     });
 
     function submitForm(event) {
         event.preventDefault();
 
         updateDoc(doc(database, 'profiles', auth.currentUser.uid), {
-            displayName: formData.displayName
+            displayName: formData.displayName,
+            palette: formData.palette
         }).then(() => {
-            getDoc(doc(database, 'profiles', auth.currentUser.uid))
-                .then(document => {
-                    setProfile(document);
-                    pageHistory.push('/');
-                });
+            pageHistory.push('/');
         });
     };
 
@@ -41,6 +42,24 @@ function ProfilePage({ auth, profile, setProfile, pageHistory }) {
                     variant='outlined'
                     value={formData.displayName}
                     onChange={(event) => setFormData({ ...formData, displayName: event.target.value })}
+                    style={{ marginBottom: 16 }}
+                />
+                <Select required fullWidth id='palettePrimaryMain' variant='outlined' value={formData.palette.primary.main} onChange={(event) => setFormData({ ...formData, palette: { ...formData.palette, primary: { main: event.target.value } } })} style={{ marginBottom: 16 }}>
+                    {themePalette.map(palette => {
+                        return (
+                            <MenuItem value={palette.code}>
+                                {palette.name}
+                            </MenuItem>
+                        );
+                    })}
+                </Select>
+                <TextField
+                    disabled
+                    fullWidth
+                    id='registerTimestamp'
+                    label='Registrado desde'
+                    variant='outlined'
+                    value={formData.registerTimestamp.toDate().toLocaleDateString()}
                     style={{ marginBottom: 16 }}
                 />
                 <Button variant='contained' color='primary' onClick={(event) => submitForm(event)}>

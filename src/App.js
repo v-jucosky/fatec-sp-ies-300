@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Switch, Route, useHistory } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
-import { getDoc, doc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { AppBar, Toolbar, Button, Container, IconButton } from '@material-ui/core';
 import { Home } from '@material-ui/icons';
+import { MuiThemeProvider, createTheme } from '@material-ui/core/styles';
 
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -18,23 +19,28 @@ function App() {
     const [profile, setProfile] = useState({});
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, user => {
+        let unsubscribeProfile = () => { return };
+
+        const unsubscribeAuth = onAuthStateChanged(auth, user => {
             if (user) {
-                getDoc(doc(database, 'profiles', auth.currentUser.uid))
-                    .then(document => {
-                        setProfile(document);
-                    });
+                unsubscribeProfile = onSnapshot(doc(database, 'profiles', auth.currentUser.uid), snapshot => {
+                    setProfile(snapshot.data());
+                });
             } else {
+                unsubscribeProfile();
                 setProfile({});
             };
         });
 
-        return unsubscribe;
+        return (() => {
+            unsubscribeProfile();
+            unsubscribeAuth();
+        });
     }, []);
 
-    function getMainContent() {
-        if (auth.currentUser) {
-            return (
+    return (
+        <MuiThemeProvider theme={createTheme({ palette: profile.palette })}>
+            {auth.currentUser ? (
                 <>
                     <AppBar position='sticky'>
                         <Toolbar>
@@ -55,16 +61,14 @@ function App() {
                             <HomePage auth={auth} profile={profile} pageHistory={pageHistory} />
                         </Route>
                         <Route exact path='/perfil'>
-                            <ProfilePage auth={auth} profile={profile} setProfile={setProfile} pageHistory={pageHistory} />
+                            <ProfilePage auth={auth} profile={profile} pageHistory={pageHistory} />
                         </Route>
                         <Route path='/jogo/:gameId'>
                             <GamePage auth={auth} profile={profile} pageHistory={pageHistory} />
                         </Route>
                     </Switch>
                 </>
-            );
-        } else {
-            return (
+            ) : (
                 <>
                     <AppBar position='sticky'>
                         <Toolbar>
@@ -82,14 +86,8 @@ function App() {
                         </Route>
                     </Switch>
                 </>
-            );
-        };
-    };
-
-    return (
-        <>
-            {getMainContent()}
-        </>
+            )}
+        </MuiThemeProvider>
     );
 };
 

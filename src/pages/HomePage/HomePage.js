@@ -56,7 +56,7 @@ function HomePage({ auth, profile, pageHistory }) {
         <>
             <Container maxWidth='md' style={{ marginTop: 64 }}>
                 <Typography gutterBottom variant='h4'>
-                    Bem vindo, {profile.data().displayName}
+                    Bem vindo, {profile.displayName}
                 </Typography>
                 <TableContainer component={Paper}>
                     <Typography gutterBottom variant='h6' style={{ margin: 16 }}>
@@ -113,7 +113,7 @@ function HomePage({ auth, profile, pageHistory }) {
                 </DialogTitle>
                 <DialogContent>
                     <Typography gutterBottom style={{ marginBottom: 16 }}>
-                        Para entrar em uma partida, coloque o ID do jogo abaixo.
+                        Para entrar em um jogo, cole ou digite o ID abaixo (20 caracteres).
                     </Typography>
                     <TextField
                         required

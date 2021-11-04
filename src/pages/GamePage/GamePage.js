@@ -8,7 +8,7 @@ import { buildSleep, getTileFromSleep, DECK_MAXIMUM_SIZE, PLAYER_LIMIT } from '.
 
 function GamePage({ auth, profile, pageHistory }) {
     const { gameId } = useParams();
-    const [players, setPlayers] = useState([{ userId: profile.id, ...profile.data() }]);
+    const [players, setPlayers] = useState([{ ...profile }]);
     const [moves, setMoves] = useState([]);
     const [deck, setDeck] = useState({});
     const [game, setGame] = useState({
@@ -173,7 +173,7 @@ function GamePage({ auth, profile, pageHistory }) {
                                 Painel do administrador
                             </Typography>
                             <Typography gutterBottom>
-                                Este painel só é visível a você, {profile.data().displayName}, por ter iniciado o jogo. Quando todos os jogadores entrarem, clique em “Iniciar jogo” para iniciar a partida.
+                                Este painel só é visível a você, {profile.displayName}, por ter iniciado o jogo. Quando todos os jogadores entrarem, clique em “Iniciar jogo” para iniciar a partida.
                             </Typography>
                         </CardContent>
                         <CardActions>

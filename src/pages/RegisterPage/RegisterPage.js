@@ -20,6 +20,7 @@ function RegisterPage({ auth, pageHistory }) {
         createUserWithEmailAndPassword(auth, formData.email, formData.password)
             .then(user => {
                 setDoc(doc(database, 'profiles', user.user.uid), {
+                    userId: user.user.uid,
                     displayName: formData.displayName,
                     registerTimestamp: serverTimestamp(),
                     superUser: false
