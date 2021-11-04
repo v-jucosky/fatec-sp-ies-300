@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { updateDoc, doc } from '@firebase/firestore';
+import { updateDoc, doc, serverTimestamp } from '@firebase/firestore';
 import { Container, Typography, Button, TextField, Select, MenuItem } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
@@ -18,7 +18,8 @@ function ProfilePage({ auth, profile, pageHistory }) {
 
         updateDoc(doc(database, 'profiles', auth.currentUser.uid), {
             displayName: formData.displayName,
-            palette: formData.palette
+            palette: formData.palette,
+            updateTimestamp: serverTimestamp()
         }).then(() => {
             pageHistory.push('/');
         });

@@ -22,7 +22,13 @@ function RegisterPage({ auth, pageHistory }) {
                 setDoc(doc(database, 'profiles', user.user.uid), {
                     userId: user.user.uid,
                     displayName: formData.displayName,
+                    palette: {
+                        primary: {
+                            main: '#3f51b5'
+                        }
+                    },
                     registerTimestamp: serverTimestamp(),
+                    updateTimestamp: serverTimestamp(),
                     superUser: false
                 }).then(document => {
                     pageHistory.push('/');
