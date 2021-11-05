@@ -8,7 +8,10 @@ Construir um jogo de dominó online multijogador, que deverá possuir:
 
 - [x] Autenticação de usuários
 - [x] Perfis de usuários (apelido, preferências, etc.)
-- [ ] Capacidade de personalização através de um “super usuário”
+- [x] Capacidade de personalização através de um “super usuário”
+- [ ] Recursos monetizáveis
+- [ ] Funcionalidade básica do jogo
+- [ ] (Extra) Chat entre jogadores de uma mesma partida
 
 ## Tecnologias
 
