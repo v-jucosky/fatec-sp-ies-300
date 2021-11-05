@@ -1,31 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { doc, addDoc, deleteDoc, onSnapshot, serverTimestamp, collection, query, where } from 'firebase/firestore';
-import { Container, Typography, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper, Dialog, DialogTitle, DialogContent, TextField, DialogActions } from '@material-ui/core';
+import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import { doc, addDoc, deleteDoc, serverTimestamp, collection } from 'firebase/firestore';
+import { Container, Typography, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper } from '@material-ui/core';
 import { Delete, PlayArrow } from '@material-ui/icons';
 
+import JoinDialog from '../../components/JoinDialog';
 import { database } from '../../utils/settings/firebase';
 
-function HomePage({ auth, profile, pageHistory }) {
-    const [games, setGames] = useState([]);
-    const [dialogData, setDialogData] = useState({
-        open: false,
-        gameId: ''
-    });
-
-    useEffect(() => {
-        const unsubscribe = onSnapshot(query(collection(database, 'games'), where('players', 'array-contains', auth.currentUser.uid)), snapshot => {
-            snapshot.docChanges()
-                .forEach(change => {
-                    if (change.type === 'added') {
-                        setGames(content => [...content, { id: change.doc.id, ...change.doc.data() }]);
-                    } else if (change.type === 'removed') {
-                        setGames(content => content.filter(game => game.id !== change.doc.id));
-                    };
-                });
-        });
-
-        return unsubscribe;
-    }, []);
+function HomePage({ auth, profile, games }) {
+    const pageHistory = useHistory();
+    const [dialogData, setDialogData] = useState({ open: false });
 
     function createGame() {
         addDoc(collection(database, 'games'), {
@@ -40,16 +24,12 @@ function HomePage({ auth, profile, pageHistory }) {
             running: false,
             open: true
         }).then(document => {
-            enterGame(document.id);
+            pageHistory.push('/jogo/' + document.id);
         });
     };
 
     function deleteGame(gameId) {
         deleteDoc(doc(database, 'games', gameId));
-    };
-
-    function enterGame(gameId) {
-        pageHistory.push('/jogo/' + gameId);
     };
 
     return (
@@ -87,7 +67,7 @@ function HomePage({ auth, profile, pageHistory }) {
                                             {game.players.length}
                                         </TableCell>
                                         <TableCell>
-                                            <Button size='small' variant='contained' color='primary' disabled={!(game.open || game.running)} onClick={() => enterGame(game.id)} style={{ marginRight: 16 }}>
+                                            <Button size='small' variant='contained' color='primary' disabled={!(game.open || game.running)} onClick={() => pageHistory.push('/jogo/' + game.id)} style={{ marginRight: 16 }}>
                                                 <PlayArrow />
                                             </Button>
                                             <Button size='small' variant='contained' color='secondary' disabled={game.owner !== auth.currentUser.uid} onClick={() => deleteGame(game.id)}>
@@ -107,34 +87,7 @@ function HomePage({ auth, profile, pageHistory }) {
                     Entrar em um jogo
                 </Button>
             </Container>
-            <Dialog open={dialogData.open} onClose={() => setDialogData({ open: false, gameId: '' })}>
-                <DialogTitle>
-                    Entrar em um jogo
-                </DialogTitle>
-                <DialogContent>
-                    <Typography gutterBottom style={{ marginBottom: 16 }}>
-                        Para entrar em um jogo, cole ou digite o ID abaixo (20 caracteres).
-                    </Typography>
-                    <TextField
-                        required
-                        fullWidth
-                        autoFocus
-                        id='gameId'
-                        label='ID do jogo'
-                        variant='outlined'
-                        value={dialogData.gameId}
-                        onChange={(event) => setDialogData({ ...dialogData, gameId: event.target.value })}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button color='primary' onClick={() => setDialogData({ open: false, gameId: '' })}>
-                        Cancelar
-                    </Button>
-                    <Button color='primary' disabled={dialogData.gameId.length !== 20} onClick={() => enterGame(dialogData.gameId)}>
-                        Entrar
-                    </Button>
-                </DialogActions>
-            </Dialog>
+            <JoinDialog dialogData={dialogData} setDialogData={setDialogData} />
         </>
     );
 };

@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
 import { addDoc, collection, serverTimestamp } from '@firebase/firestore';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, Button } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, Checkbox, FormControlLabel, InputAdornment, Button } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
 
 function ThemeDialog({ dialogData, setDialogData }) {
-    const [themeData, setThemeData] = useState({ name: '', code: '' });
+    const [themeData, setThemeData] = useState({ name: '', code: '', isPremium: false, price: 0 });
 
     function closeDialog() {
-        setThemeData({ name: '', code: '' });
+        setThemeData({ name: '', code: '', isPremium: false, price: 0 });
         setDialogData({ ...dialogData, open: false });
     };
 
     function createTheme() {
         addDoc(collection(database, 'themes'), {
-            name: themeData.name,
-            code: themeData.code,
+            ...themeData,
             createTimestamp: serverTimestamp()
         }).then(() => {
             closeDialog();
@@ -23,13 +22,13 @@ function ThemeDialog({ dialogData, setDialogData }) {
     };
 
     return (
-        <Dialog open={dialogData.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogData.open} onClose={() => closeDialog()}>
             <DialogTitle>
-                Tema
+                Criar tema
             </DialogTitle>
             <DialogContent>
                 <Typography gutterBottom style={{ marginBottom: 16 }}>
-                    Crie um novo tema.
+                    Crie um novo tema, que ficará disponível a todos os jogadores.
                 </Typography>
                 <TextField
                     required
@@ -50,7 +49,35 @@ function ThemeDialog({ dialogData, setDialogData }) {
                     variant='outlined'
                     value={themeData.code}
                     onChange={(event) => setThemeData({ ...themeData, code: event.target.value })}
+                    InputProps={{ startAdornment: <InputAdornment position='start'>#</InputAdornment> }}
+                    style={{ marginBottom: 16 }}
                 />
+                <FormControlLabel
+                    label='Este será um tema premium'
+                    control={
+                        <Checkbox
+                            required
+                            id='isPremium'
+                            checked={themeData.isPremium}
+                            onChange={() => setThemeData({ ...themeData, isPremium: !themeData.isPremium })}
+                            style={{ marginLeft: 16 }}
+                        />
+                    }
+                />
+                {themeData.isPremium &&
+                    <TextField
+                        required
+                        fullWidth
+                        id='price'
+                        label='Preço'
+                        type='number'
+                        variant='outlined'
+                        value={themeData.price}
+                        onChange={(event) => setThemeData({ ...themeData, price: event.target.value })}
+                        InputProps={{ startAdornment: <InputAdornment position='start'>R$</InputAdornment> }}
+                        style={{ marginTop: 16 }}
+                    />
+                }
             </DialogContent>
             <DialogActions>
                 <Button color='primary' onClick={() => closeDialog()}>

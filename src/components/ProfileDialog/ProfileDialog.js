@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { updateDoc, doc, serverTimestamp } from '@firebase/firestore';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, MenuItem, Button } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
-import { themePalette as palettes } from '../../utils/shared/game';
 
-function ProfileDialog({ dialogData, setDialogData, auth, profile }) {
+function ProfileDialog({ dialogData, setDialogData, auth, profile, themes }) {
     const [profileData, setProfileData] = useState({ ...profile });
+
+    useEffect(() => {
+        setProfileData({ ...profile });
+    }, [profile]);
 
     function closeDialog() {
         setProfileData({ ...profile });
@@ -24,9 +27,9 @@ function ProfileDialog({ dialogData, setDialogData, auth, profile }) {
     };
 
     return (
-        <Dialog open={dialogData.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogData.open} onClose={() => closeDialog()}>
             <DialogTitle>
-                Perfil
+                Editar perfil
             </DialogTitle>
             <DialogContent>
                 <Typography gutterBottom style={{ marginBottom: 16 }}>
@@ -54,10 +57,10 @@ function ProfileDialog({ dialogData, setDialogData, auth, profile }) {
                     onChange={(event) => setProfileData({ ...profileData, palette: { ...profileData.palette, primary: { ...profileData.palette.primary, main: event.target.value } } })}
                     style={{ marginBottom: 16 }}
                 >
-                    {palettes.map(palette => {
+                    {themes.map(theme => {
                         return (
-                            <MenuItem value={palette.code}>
-                                {palette.name}
+                            <MenuItem value={theme.code}>
+                                {theme.name}
                             </MenuItem>
                         );
                     })}
@@ -69,15 +72,6 @@ function ProfileDialog({ dialogData, setDialogData, auth, profile }) {
                     label='Data de cadastro'
                     variant='outlined'
                     value={profileData.registerTimestamp.toDate().toLocaleDateString()}
-                    style={{ marginBottom: 16 }}
-                />
-                <TextField
-                    disabled
-                    fullWidth
-                    id='updateTimestamp'
-                    label='Data da última atualização'
-                    variant='outlined'
-                    value={profileData.updateTimestamp.toDate().toLocaleDateString()}
                 />
             </DialogContent>
             <DialogActions>

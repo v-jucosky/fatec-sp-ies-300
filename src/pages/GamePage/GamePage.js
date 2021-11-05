@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { doc, addDoc, getDoc, setDoc, updateDoc, onSnapshot, arrayUnion, arrayRemove, collection, query, increment, serverTimestamp } from 'firebase/firestore';
 import { Container, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, CardContent, CardActions } from '@material-ui/core';
@@ -6,7 +7,8 @@ import { Container, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, Ca
 import { database } from '../../utils/settings/firebase';
 import { buildSleep, getTileFromSleep, DECK_MAXIMUM_SIZE, PLAYER_LIMIT } from '../../utils/shared/game';
 
-function GamePage({ auth, profile, pageHistory }) {
+function GamePage({ auth, profile }) {
+    const pageHistory = useHistory();
     const { gameId } = useParams();
     const [players, setPlayers] = useState([{ ...profile }]);
     const [moves, setMoves] = useState([]);

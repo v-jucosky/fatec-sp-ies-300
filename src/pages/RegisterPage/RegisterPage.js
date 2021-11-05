@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { setDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { Container, Typography, Button, TextField } from '@material-ui/core';
@@ -6,7 +7,8 @@ import { Alert } from '@material-ui/lab';
 
 import { database } from '../../utils/settings/firebase';
 
-function RegisterPage({ auth, pageHistory }) {
+function RegisterPage({ auth }) {
+    const pageHistory = useHistory();
     const [registerData, setRegisterData] = useState({
         displayName: '',
         email: '',

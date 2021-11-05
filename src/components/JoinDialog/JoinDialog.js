@@ -11,12 +11,8 @@ function JoinDialog({ dialogData, setDialogData }) {
         setDialogData({ ...dialogData, open: false });
     };
 
-    function joinGame() {
-        pageHistory.push('/jogo/' + joinData.gameId);
-    };
-
     return (
-        <Dialog open={dialogData.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogData.open} onClose={() => closeDialog()}>
             <DialogTitle>
                 Entrar em um jogo
             </DialogTitle>
@@ -39,7 +35,7 @@ function JoinDialog({ dialogData, setDialogData }) {
                 <Button color='primary' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
-                <Button color='primary' disabled={joinData.gameId.length !== 20} onClick={() => joinGame()}>
+                <Button color='primary' disabled={joinData.gameId.length !== 20} onClick={() => pageHistory.push('/jogo/' + joinData.gameId)}>
                     Entrar
                 </Button>
             </DialogActions>
