@@ -7,43 +7,43 @@ import { Alert } from '@material-ui/lab';
 import { database } from '../../utils/settings/firebase';
 
 function RegisterPage({ auth, pageHistory }) {
-    const [formData, setFormData] = useState({
+    const [registerData, setRegisterData] = useState({
         displayName: '',
         email: '',
         password: '',
         validationErrors: {}
     });
 
-    function submitForm(event) {
+    function createUser(event) {
         event.preventDefault();
 
-        createUserWithEmailAndPassword(auth, formData.email, formData.password)
+        createUserWithEmailAndPassword(auth, registerData.email, registerData.password)
             .then(user => {
                 setDoc(doc(database, 'profiles', user.user.uid), {
                     userId: user.user.uid,
-                    displayName: formData.displayName,
+                    displayName: registerData.displayName,
                     palette: {
                         primary: {
                             main: '#3f51b5'
                         }
                     },
+                    superUser: false,
                     registerTimestamp: serverTimestamp(),
-                    updateTimestamp: serverTimestamp(),
-                    superUser: false
+                    updateTimestamp: serverTimestamp()
                 }).then(document => {
                     pageHistory.push('/');
                 });
             }).catch(error => {
-                setFormData({ ...formData, validationErrors: { ...formData.validationErrors, [error.code]: error } });
+                setRegisterData({ ...registerData, validationErrors: { ...registerData.validationErrors, [error.code]: error } });
             });
     };
 
     function closeAlert(errorCode) {
-        let validationErrors = formData.validationErrors;
+        let validationErrors = registerData.validationErrors;
 
         delete validationErrors[errorCode];
 
-        setFormData({ ...formData, validationErrors: validationErrors });
+        setRegisterData({ ...registerData, validationErrors: validationErrors });
     };
 
     return (
@@ -54,7 +54,7 @@ function RegisterPage({ auth, pageHistory }) {
             <Typography gutterBottom variant='subtitle1' style={{ marginBottom: 16 }}>
                 Preencha o formulário abaixo para se registrar.
             </Typography>
-            {Object.keys(formData.validationErrors).map(errorCode => {
+            {Object.keys(registerData.validationErrors).map(errorCode => {
                 return (
                     <Alert severity='error' onClose={() => closeAlert(errorCode)} style={{ marginBottom: 16 }}>
                         Ocorreu um erro ao processar sua solicitação ({errorCode}).
@@ -69,8 +69,8 @@ function RegisterPage({ auth, pageHistory }) {
                     id='displayName'
                     label='Apelido'
                     variant='outlined'
-                    value={formData.displayName}
-                    onChange={(event) => setFormData({ ...formData, displayName: event.target.value })}
+                    value={registerData.displayName}
+                    onChange={(event) => setRegisterData({ ...registerData, displayName: event.target.value })}
                     style={{ marginBottom: 16 }}
                 />
                 <TextField
@@ -79,8 +79,8 @@ function RegisterPage({ auth, pageHistory }) {
                     id='email'
                     label='E-mail'
                     variant='outlined'
-                    value={formData.email}
-                    onChange={(event) => setFormData({ ...formData, email: event.target.value })}
+                    value={registerData.email}
+                    onChange={(event) => setRegisterData({ ...registerData, email: event.target.value })}
                     style={{ marginBottom: 16 }}
                 />
                 <TextField
@@ -90,11 +90,11 @@ function RegisterPage({ auth, pageHistory }) {
                     label='Senha'
                     variant='outlined'
                     type='password'
-                    value={formData.password}
-                    onChange={(event) => setFormData({ ...formData, password: event.target.value })}
+                    value={registerData.password}
+                    onChange={(event) => setRegisterData({ ...registerData, password: event.target.value })}
                     style={{ marginBottom: 16 }}
                 />
-                <Button variant='contained' color='primary' onClick={(event) => submitForm(event)}>
+                <Button variant='contained' color='primary' onClick={(event) => createUser(event)}>
                     Registrar
                 </Button>
             </form>
