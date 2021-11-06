@@ -49,7 +49,7 @@ function RegisterPage({ auth }) {
     };
 
     return (
-        <Container maxWidth='md' style={{ marginTop: 64 }}>
+        <Container maxWidth='md' style={{ marginTop: 64, marginBottom: 64 }}>
             <Typography gutterBottom variant='h4'>
                 Registrar
             </Typography>

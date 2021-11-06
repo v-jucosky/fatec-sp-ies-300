@@ -5,10 +5,10 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextFiel
 import { database } from '../../utils/settings/firebase';
 
 function ThemeDialog({ dialogData, setDialogData }) {
-    const [themeData, setThemeData] = useState({ name: '', code: '', isPremium: false, price: 0 });
+    const [themeData, setThemeData] = useState({ name: '', code: '', price: 0 });
 
     function closeDialog() {
-        setThemeData({ name: '', code: '', isPremium: false, price: 0 });
+        setThemeData({ name: '', code: '', price: 0 });
         setDialogData({ ...dialogData, open: false });
     };
 
@@ -28,7 +28,7 @@ function ThemeDialog({ dialogData, setDialogData }) {
             </DialogTitle>
             <DialogContent>
                 <Typography gutterBottom style={{ marginBottom: 16 }}>
-                    Crie um novo tema, que ficará disponível a todos os jogadores.
+                    Crie um novo tema, que ficará disponível aos jogadores através da loja.
                 </Typography>
                 <TextField
                     required
@@ -52,32 +52,17 @@ function ThemeDialog({ dialogData, setDialogData }) {
                     InputProps={{ startAdornment: <InputAdornment position='start'>#</InputAdornment> }}
                     style={{ marginBottom: 16 }}
                 />
-                <FormControlLabel
-                    label='Este será um tema premium'
-                    control={
-                        <Checkbox
-                            required
-                            id='isPremium'
-                            checked={themeData.isPremium}
-                            onChange={() => setThemeData({ ...themeData, isPremium: !themeData.isPremium })}
-                            style={{ marginLeft: 16 }}
-                        />
-                    }
+                <TextField
+                    required
+                    fullWidth
+                    id='price'
+                    label='Preço'
+                    type='number'
+                    variant='outlined'
+                    value={themeData.price}
+                    onChange={(event) => setThemeData({ ...themeData, price: event.target.value })}
+                    InputProps={{ startAdornment: <InputAdornment position='start'>R$</InputAdornment> }}
                 />
-                {themeData.isPremium &&
-                    <TextField
-                        required
-                        fullWidth
-                        id='price'
-                        label='Preço'
-                        type='number'
-                        variant='outlined'
-                        value={themeData.price}
-                        onChange={(event) => setThemeData({ ...themeData, price: event.target.value })}
-                        InputProps={{ startAdornment: <InputAdornment position='start'>R$</InputAdornment> }}
-                        style={{ marginTop: 16 }}
-                    />
-                }
             </DialogContent>
             <DialogActions>
                 <Button color='primary' onClick={() => closeDialog()}>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { updateDoc, doc, serverTimestamp } from '@firebase/firestore';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, MenuItem, Button } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, MenuItem, Button, Link as MaterialLink } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
 
@@ -34,6 +35,8 @@ function ProfileDialog({ dialogData, setDialogData, auth, profile, themes }) {
             <DialogContent>
                 <Typography gutterBottom style={{ marginBottom: 16 }}>
                     Atualize seu perfil e preferências.
+                    <br />
+                    Visite a <MaterialLink to='/loja' component={Link}>loja de temas</MaterialLink> para visualizar mais temas.
                 </Typography>
                 <TextField
                     required
