@@ -3,80 +3,71 @@ import { Switch, Route, useHistory } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import { AppBar, Toolbar, Container, IconButton } from '@material-ui/core';
-import { Home, AccountCircle, ExitToApp, Settings } from '@material-ui/icons';
+import { Home, AccountCircle, ExitToApp, Store, Settings } from '@material-ui/icons';
 import { MuiThemeProvider, createTheme } from '@material-ui/core/styles';
 
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
 import SettingsPage from './pages/SettingsPage';
-import GamePage from './pages/GamePage/GamePage';
-import { firebaseApp, database } from './utils/settings/firebase';
+import StorePage from './pages/StorePage';
+import GamePage from './pages/GamePage';
 import ProfileDialog from './components/ProfileDialog';
+import { firebaseApp, database } from './utils/settings/firebase';
+import { arrayUpdate, objectUpdate } from './utils/utils/common';
 
 function App() {
     const auth = getAuth(firebaseApp);
     const pageHistory = useHistory();
     const [profile, setProfile] = useState({});
-    const [themes, setThemes] = useState([]);
+    const [purchases, setPurchases] = useState([]);
     const [games, setGames] = useState([]);
-    const [dialogData, setDialogData] = useState({ open: false });
+    const [themes, setThemes] = useState([]);
+    const [dialogState, setDialogState] = useState({ open: false });
 
     useEffect(() => {
         let unsubscribeProfile = () => { return };
-        let unsubscribeThemes = () => { return };
+        let unsubscribePurchases = () => { return };
         let unsubscribeGames = () => { return };
+        let unsubscribeThemes = () => { return };
 
         const unsubscribeAuth = onAuthStateChanged(auth, user => {
             if (user) {
                 unsubscribeProfile = onSnapshot(doc(database, 'profiles', auth.currentUser.uid), snapshot => {
-                    console.log('PERFIL ATUALIZADO');
-                    setProfile(snapshot.data());
+                    objectUpdate(snapshot, profile, setProfile);
                 });
 
-                unsubscribeThemes = onSnapshot(query(collection(database, 'themes')), snapshot => {
-                    snapshot.docChanges()
-                        .forEach(change => {
-                            if (change.type === 'added') {
-                                console.log('TEMA ADICIONADO');
-                                setThemes(content => [...content, { id: change.doc.id, ...change.doc.data() }]);
-                            } else if (change.type === 'removed') {
-                                console.log('TEMA REMOVIDO');
-                                setThemes(content => content.filter(theme => theme.id !== change.doc.id));
-                            };
-                        });
+                unsubscribePurchases = onSnapshot(query(collection(database, 'profiles', auth.currentUser.uid, 'purchases')), snapshot => {
+                    arrayUpdate(snapshot, purchases, setPurchases);
                 });
 
                 unsubscribeGames = onSnapshot(query(collection(database, 'games'), where('players', 'array-contains', auth.currentUser.uid)), snapshot => {
-                    snapshot.docChanges()
-                        .forEach(change => {
-                            if (change.type === 'added') {
-                                console.log('JOGO ADICIONADO');
-                                setGames(content => [...content, { id: change.doc.id, ...change.doc.data() }]);
-                            } else if (change.type === 'removed') {
-                                console.log('JOGO REMOVIDO');
-                                setGames(content => content.filter(game => game.id !== change.doc.id));
-                            };
-                        });
+                    arrayUpdate(snapshot, games, setGames);
+                });
+
+                unsubscribeThemes = onSnapshot(query(collection(database, 'themes')), snapshot => {
+                    arrayUpdate(snapshot, themes, setThemes);
                 });
             } else {
                 unsubscribeProfile();
-                unsubscribeThemes();
+                unsubscribePurchases();
                 unsubscribeGames();
+                unsubscribeThemes();
                 setProfile({});
             };
         });
 
         return (() => {
             unsubscribeProfile();
-            unsubscribeThemes();
+            unsubscribePurchases();
             unsubscribeGames();
+            unsubscribeThemes();
             unsubscribeAuth();
         });
     }, []);
 
     return (
-        <MuiThemeProvider theme={createTheme({ palette: profile.palette })}>
+        <MuiThemeProvider theme={createTheme({ palette: { primary: { main: profile.accentColor } } })}>
             {auth.currentUser ? (
                 <>
                     <AppBar position='sticky'>
@@ -86,11 +77,14 @@ function App() {
                             </IconButton>
                             <Container style={{ flexGrow: 1 }} />
                             {profile.superUser &&
-                                <IconButton color='inherit' onClick={() => pageHistory.push('/configuracoes')}>
+                                <IconButton color='inherit' onClick={() => pageHistory.push('/configuracao')}>
                                     <Settings />
                                 </IconButton>
                             }
-                            <IconButton color='inherit' onClick={() => setDialogData({ ...dialogData, open: true })}>
+                            <IconButton color='inherit' onClick={() => pageHistory.push('/loja')}>
+                                <Store />
+                            </IconButton>
+                            <IconButton color='inherit' onClick={() => setDialogState({ ...dialogState, open: true })}>
                                 <AccountCircle />
                             </IconButton>
                             <IconButton color='inherit' onClick={() => signOut(auth)}>
@@ -103,15 +97,18 @@ function App() {
                             <HomePage auth={auth} profile={profile} games={games} />
                         </Route>
                         {profile.superUser &&
-                            <Route exact path='/configuracoes'>
+                            <Route exact path='/configuracao'>
                                 <SettingsPage auth={auth} profile={profile} themes={themes} />
                             </Route>
                         }
+                        <Route path='/loja'>
+                            <StorePage auth={auth} profile={profile} themes={themes} purchases={purchases} />
+                        </Route>
                         <Route path='/jogo/:gameId'>
-                            <GamePage auth={auth} profile={profile} />
+                            <GamePage auth={auth} profile={profile} games={games} />
                         </Route>
                     </Switch>
-                    <ProfileDialog dialogData={dialogData} setDialogData={setDialogData} auth={auth} profile={profile} themes={themes} />
+                    <ProfileDialog dialogState={dialogState} setDialogState={setDialogState} auth={auth} profile={profile} purchases={purchases} />
                 </>
             ) : (
                 <>
