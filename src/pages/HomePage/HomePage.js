@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { doc, addDoc, deleteDoc, serverTimestamp, collection } from 'firebase/firestore';
 import { Container, Typography, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper } from '@material-ui/core';
-import { Delete, PlayArrow } from '@material-ui/icons';
+import { Delete, PlayArrow, Visibility } from '@material-ui/icons';
 
 import JoinDialog from '../../components/JoinDialog';
 import { database } from '../../utils/settings/firebase';
 
 function HomePage({ auth, profile, games }) {
     const pageHistory = useHistory();
-    const [dialogData, setDialogData] = useState({ open: false });
+    const [dialogState, setDialogState] = useState({ open: false });
 
     function createGame() {
         addDoc(collection(database, 'games'), {
@@ -19,34 +19,37 @@ function HomePage({ auth, profile, games }) {
                 auth.currentUser.uid
             ],
             sleep: [],
-            moveCount: 0,
-            createTimestamp: serverTimestamp(),
+            moves: 0,
             running: false,
-            open: true
+            open: true,
+            createTimestamp: serverTimestamp()
         }).then(document => {
             pageHistory.push('/jogo/' + document.id);
         });
     };
 
-    function deleteGame(gameId) {
-        deleteDoc(doc(database, 'games', gameId));
+    function deleteGame(id) {
+        deleteDoc(doc(database, 'games', id));
     };
 
     return (
         <>
-            <Container maxWidth='md' style={{ marginTop: 64 }}>
+            <Container maxWidth='md' style={{ marginTop: 64, marginBottom: 64 }}>
                 <Typography gutterBottom variant='h4'>
                     Bem vindo, {profile.displayName}
                 </Typography>
-                <TableContainer component={Paper}>
+                <TableContainer component={Paper} style={{ marginBottom: 16 }}>
                     <Typography gutterBottom variant='h6' style={{ margin: 16 }}>
-                        Meus jogos
+                        Jogos
+                    </Typography>
+                    <Typography gutterBottom style={{ margin: 16 }}>
+                        Continue seus jogos ou apage-os. Note que apagar um jogo tabém exclui o chat daquela partida.
                     </Typography>
                     <Table>
                         <TableHead>
                             <TableRow>
                                 <TableCell>
-                                    ID do jogo
+                                    ID
                                 </TableCell>
                                 <TableCell>
                                     Jogadores
@@ -59,7 +62,7 @@ function HomePage({ auth, profile, games }) {
                         <TableBody>
                             {games.map(game => {
                                 return (
-                                    <TableRow key={game.id}>
+                                    <TableRow>
                                         <TableCell>
                                             {game.id}
                                         </TableCell>
@@ -67,8 +70,12 @@ function HomePage({ auth, profile, games }) {
                                             {game.players.length}
                                         </TableCell>
                                         <TableCell>
-                                            <Button size='small' variant='contained' color='primary' disabled={!(game.open || game.running)} onClick={() => pageHistory.push('/jogo/' + game.id)} style={{ marginRight: 16 }}>
-                                                <PlayArrow />
+                                            <Button size='small' variant='contained' color='primary' onClick={() => pageHistory.push('/jogo/' + game.id)} style={{ marginRight: 16 }}>
+                                                {(game.running || game.open) ?
+                                                    <PlayArrow />
+                                                    :
+                                                    <Visibility />
+                                                }
                                             </Button>
                                             <Button size='small' variant='contained' color='secondary' disabled={game.owner !== auth.currentUser.uid} onClick={() => deleteGame(game.id)}>
                                                 <Delete />
@@ -80,14 +87,14 @@ function HomePage({ auth, profile, games }) {
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <Button variant='contained' color='primary' onClick={() => createGame()} style={{ marginTop: 16, marginRight: 16 }}>
-                    Criar jogo
+                <Button variant='contained' color='primary' onClick={() => createGame()} style={{ marginRight: 16 }}>
+                    Novo jogo
                 </Button>
-                <Button variant='contained' color='primary' onClick={() => setDialogData({ ...dialogData, open: true })} style={{ marginTop: 16 }}>
+                <Button variant='contained' color='primary' onClick={() => setDialogState({ ...dialogState, open: true })}>
                     Entrar em um jogo
                 </Button>
             </Container>
-            <JoinDialog dialogData={dialogData} setDialogData={setDialogData} />
+            <JoinDialog dialogState={dialogState} setDialogState={setDialogState} />
         </>
     );
 };

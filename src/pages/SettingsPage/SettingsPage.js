@@ -7,29 +7,32 @@ import ThemeDialog from '../../components/ThemeDialog';
 import { database } from '../../utils/settings/firebase';
 
 function SettingsPage({ auth, profile, themes }) {
-    const [tabData, setTabData] = useState({ index: 0 });
-    const [dialogData, setDialogData] = useState({ open: false });
+    const [tabState, setTabState] = useState({ index: 0 });
+    const [dialogState, setDialogState] = useState({ open: false });
 
-    function deleteTheme(themeId) {
-        deleteDoc(doc(database, 'themes', themeId));
+    function deleteTheme(id) {
+        deleteDoc(doc(database, 'themes', id));
     };
 
     return (
         <>
-            <Container maxWidth='md' style={{ marginTop: 64 }}>
+            <Container maxWidth='md' style={{ marginTop: 64, marginBottom: 64 }}>
                 <Typography gutterBottom variant='h4'>
                     Configurações
                 </Typography>
                 <Box>
-                    <Tabs value={tabData.index} onChange={(event, value) => setTabData({ ...tabData, index: value })}>
+                    <Tabs value={tabState.index} onChange={(event, value) => setTabState({ ...tabState, index: value })}>
                         <Tab label='Temas' />
                         <Tab label='Sobre' />
                     </Tabs>
-                    {tabData.index === 0 &&
+                    {tabState.index === 0 &&
                         <>
                             <TableContainer component={Paper} style={{ marginTop: 24 }}>
                                 <Typography gutterBottom variant='h6' style={{ margin: 16 }}>
-                                    Temas disponíveis
+                                    Temas
+                                </Typography>
+                                <Typography gutterBottom style={{ margin: 16 }}>
+                                    Temas não podem ser editados, pois são itens comercializados aos usuários da plataforma. Excluir um tema não o remove dos usuários que o adquiriram.
                                 </Typography>
                                 <Table>
                                     <TableHead>
@@ -41,6 +44,9 @@ function SettingsPage({ auth, profile, themes }) {
                                                 Cor de destaque
                                             </TableCell>
                                             <TableCell>
+                                                Preço
+                                            </TableCell>
+                                            <TableCell>
                                                 Ações
                                             </TableCell>
                                         </TableRow>
@@ -48,12 +54,15 @@ function SettingsPage({ auth, profile, themes }) {
                                     <TableBody>
                                         {themes.map(theme => {
                                             return (
-                                                <TableRow key={theme.id}>
+                                                <TableRow>
                                                     <TableCell>
                                                         {theme.name}
                                                     </TableCell>
                                                     <TableCell>
                                                         {theme.code}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        R$ {theme.price.toFixed(2)}
                                                     </TableCell>
                                                     <TableCell>
                                                         <Button size='small' variant='contained' color='secondary' onClick={() => deleteTheme(theme.id)}>
@@ -66,24 +75,24 @@ function SettingsPage({ auth, profile, themes }) {
                                     </TableBody>
                                 </Table>
                             </TableContainer>
-                            <Button variant='contained' color='primary' onClick={() => setDialogData({ ...dialogData, open: true })} style={{ marginTop: 16 }}>
+                            <Button variant='contained' color='primary' onClick={() => setDialogState({ ...dialogState, open: true })} style={{ marginTop: 16 }}>
                                 Novo tema
                             </Button>
                         </>
                     }
-                    {tabData.index === 1 &&
+                    {tabState.index === 1 &&
                         <>
                             <Typography gutterBottom variant='h6' style={{ marginTop: 24 }}>
                                 Sobre o desenvolvedor
                             </Typography>
-                            <Typography gutterBottom variant='subtitle1'>
+                            <Typography gutterBottom>
                                 Em desenvolvimento.
                             </Typography>
                         </>
                     }
                 </Box>
             </Container>
-            <ThemeDialog dialogData={dialogData} setDialogData={setDialogData} />
+            <ThemeDialog dialogState={dialogState} setDialogState={setDialogState} />
         </>
     );
 };

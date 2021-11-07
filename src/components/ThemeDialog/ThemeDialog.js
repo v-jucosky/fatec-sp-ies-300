@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { addDoc, collection, serverTimestamp } from '@firebase/firestore';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, Checkbox, FormControlLabel, InputAdornment, Button } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, InputAdornment, Button } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
 
-function ThemeDialog({ dialogData, setDialogData }) {
-    const [themeData, setThemeData] = useState({ name: '', code: '', price: 0 });
+function ThemeDialog({ dialogState, setDialogState }) {
+    const [dialogContent, setDialogContent] = useState({ name: '', code: '', description: '', price: null });
 
     function closeDialog() {
-        setThemeData({ name: '', code: '', price: 0 });
-        setDialogData({ ...dialogData, open: false });
+        setDialogContent({ name: '', code: '', description: '', price: null });
+        setDialogState({ ...dialogState, open: false });
     };
 
     function createTheme() {
         addDoc(collection(database, 'themes'), {
-            ...themeData,
+            name: dialogContent.name,
+            code: '#' + dialogContent.code,
+            description: dialogContent.description,
+            price: parseFloat(parseFloat(dialogContent.price).toFixed(2)),
             createTimestamp: serverTimestamp()
         }).then(() => {
             closeDialog();
@@ -22,9 +25,9 @@ function ThemeDialog({ dialogData, setDialogData }) {
     };
 
     return (
-        <Dialog maxWidth='sm' fullWidth={true} open={dialogData.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogState.open} onClose={() => closeDialog()}>
             <DialogTitle>
-                Criar tema
+                Novo tema
             </DialogTitle>
             <DialogContent>
                 <Typography gutterBottom style={{ marginBottom: 16 }}>
@@ -37,8 +40,8 @@ function ThemeDialog({ dialogData, setDialogData }) {
                     id='name'
                     label='Nome'
                     variant='outlined'
-                    value={themeData.name}
-                    onChange={(event) => setThemeData({ ...themeData, name: event.target.value })}
+                    value={dialogContent.name}
+                    onChange={(event) => setDialogContent({ ...dialogContent, name: event.target.value })}
                     style={{ marginBottom: 16 }}
                 />
                 <TextField
@@ -47,8 +50,8 @@ function ThemeDialog({ dialogData, setDialogData }) {
                     id='code'
                     label='Código'
                     variant='outlined'
-                    value={themeData.code}
-                    onChange={(event) => setThemeData({ ...themeData, code: event.target.value })}
+                    value={dialogContent.code}
+                    onChange={(event) => setDialogContent({ ...dialogContent, code: event.target.value })}
                     InputProps={{ startAdornment: <InputAdornment position='start'>#</InputAdornment> }}
                     style={{ marginBottom: 16 }}
                 />
@@ -57,18 +60,29 @@ function ThemeDialog({ dialogData, setDialogData }) {
                     fullWidth
                     id='price'
                     label='Preço'
-                    type='number'
                     variant='outlined'
-                    value={themeData.price}
-                    onChange={(event) => setThemeData({ ...themeData, price: event.target.value })}
+                    type='number'
+                    value={dialogContent.price}
+                    onChange={(event) => setDialogContent({ ...dialogContent, price: event.target.value })}
                     InputProps={{ startAdornment: <InputAdornment position='start'>R$</InputAdornment> }}
+                    style={{ marginBottom: 16 }}
+                />
+                <TextField
+                    fullWidth
+                    multiline
+                    id='description'
+                    label='Descrição'
+                    variant='outlined'
+                    rows={5}
+                    value={dialogContent.description}
+                    onChange={(event) => setDialogContent({ ...dialogContent, description: event.target.value })}
                 />
             </DialogContent>
             <DialogActions>
                 <Button color='primary' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
-                <Button color='primary' onClick={() => createTheme()}>
+                <Button color='primary' disabled={!(dialogContent.code.length === 6 && dialogContent.name.length > 0 && dialogContent.price)} onClick={() => createTheme()}>
                     Salvar
                 </Button>
             </DialogActions>

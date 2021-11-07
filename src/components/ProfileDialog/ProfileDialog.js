@@ -84,7 +84,7 @@ function ProfileDialog({ dialogState, setDialogState, auth, profile, purchases }
                 <Button color='primary' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
-                <Button color='primary' onClick={() => updateProfile()}>
+                <Button color='primary' disabled={!(dialogContent.displayName.length > 0)} onClick={() => updateProfile()}>
                     Salvar
                 </Button>
             </DialogActions>
