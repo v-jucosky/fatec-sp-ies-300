@@ -5,27 +5,25 @@ import { Container, Typography, Button, TextField } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 
 function LoginPage({ auth }) {
-    const [loginData, setLoginData] = useState({
+    const [formContent, setFormContent] = useState({
         email: '',
         password: '',
         validationErrors: {}
     });
 
-    function login(event) {
-        event.preventDefault();
-
-        signInWithEmailAndPassword(auth, loginData.email, loginData.password)
+    function authenticateUser() {
+        signInWithEmailAndPassword(auth, formContent.email, formContent.password)
             .catch(error => {
-                setLoginData({ ...loginData, validationErrors: { ...loginData.validationErrors, [error.code]: error } });
+                setFormContent({ ...formContent, validationErrors: { ...formContent.validationErrors, [error.code]: error } });
             });
     };
 
     function closeAlert(errorCode) {
-        let validationErrors = loginData.validationErrors;
+        let validationErrors = formContent.validationErrors;
 
         delete validationErrors[errorCode];
 
-        setLoginData({ ...loginData, validationErrors: validationErrors });
+        setFormContent({ ...formContent, validationErrors: validationErrors });
     };
 
     return (
@@ -33,10 +31,10 @@ function LoginPage({ auth }) {
             <Typography gutterBottom variant='h4'>
                 Login
             </Typography>
-            <Typography gutterBottom variant='subtitle1' style={{ marginBottom: 16 }}>
+            <Typography gutterBottom style={{ marginBottom: 16 }}>
                 Realize o login para poder jogar ou registre-se.
             </Typography>
-            {Object.keys(loginData.validationErrors).map(errorCode => {
+            {Object.keys(formContent.validationErrors).map(errorCode => {
                 return (
                     <Alert severity='error' onClose={() => closeAlert(errorCode)} style={{ marginBottom: 16 }}>
                         Ocorreu um erro ao processar sua solicitação ({errorCode}).
@@ -50,8 +48,8 @@ function LoginPage({ auth }) {
                 id='email'
                 label='E-mail'
                 variant='outlined'
-                value={loginData.email}
-                onChange={(event) => setLoginData({ ...loginData, email: event.target.value })}
+                value={formContent.email}
+                onChange={(event) => setFormContent({ ...formContent, email: event.target.value })}
                 style={{ marginBottom: 16 }}
             />
             <TextField
@@ -61,11 +59,11 @@ function LoginPage({ auth }) {
                 label='Senha'
                 variant='outlined'
                 type='password'
-                value={loginData.password}
-                onChange={(event) => setLoginData({ ...loginData, password: event.target.value })}
+                value={formContent.password}
+                onChange={(event) => setFormContent({ ...formContent, password: event.target.value })}
                 style={{ marginBottom: 16 }}
             />
-            <Button variant='contained' color='primary' onClick={(event) => login(event)} style={{ marginRight: 16 }}>
+            <Button variant='contained' color='primary' onClick={() => authenticateUser()} style={{ marginRight: 16 }}>
                 Login
             </Button>
             <Button variant='contained' color='primary' to='/registrar' component={Link} >

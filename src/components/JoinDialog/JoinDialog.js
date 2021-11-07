@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, Button } from '@material-ui/core';
 
-function JoinDialog({ dialogData, setDialogData }) {
+function JoinDialog({ dialogState, setDialogState }) {
     const pageHistory = useHistory();
-    const [joinData, setJoinData] = useState({ gameId: '' });
+    const [dialogContent, setDialogContent] = useState({ id: '' });
 
     function closeDialog() {
-        setJoinData({ gameId: '' });
-        setDialogData({ ...dialogData, open: false });
+        setDialogContent({ id: '' });
+        setDialogState({ ...dialogState, open: false });
     };
 
     return (
-        <Dialog maxWidth='sm' fullWidth={true} open={dialogData.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogState.open} onClose={() => closeDialog()}>
             <DialogTitle>
                 Entrar em um jogo
             </DialogTitle>
@@ -24,18 +24,18 @@ function JoinDialog({ dialogData, setDialogData }) {
                     required
                     fullWidth
                     autoFocus
-                    id='gameId'
-                    label='ID do jogo'
+                    id='id'
+                    label='ID'
                     variant='outlined'
-                    value={joinData.gameId}
-                    onChange={(event) => setJoinData({ ...joinData, gameId: event.target.value })}
+                    value={dialogContent.gameId}
+                    onChange={(event) => setDialogContent({ ...dialogContent, id: event.target.value })}
                 />
             </DialogContent>
             <DialogActions>
                 <Button color='primary' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
-                <Button color='primary' disabled={joinData.gameId.length !== 20} onClick={() => pageHistory.push('/jogo/' + joinData.gameId)}>
+                <Button color='primary' disabled={dialogContent.id.length !== 20} onClick={() => pageHistory.push('/jogo/' + dialogContent.id)}>
                     Entrar
                 </Button>
             </DialogActions>

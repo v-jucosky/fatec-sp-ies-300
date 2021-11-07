@@ -9,43 +9,38 @@ import { database } from '../../utils/settings/firebase';
 
 function RegisterPage({ auth }) {
     const pageHistory = useHistory();
-    const [registerData, setRegisterData] = useState({
+    const [formContent, setFormContent] = useState({
         displayName: '',
         email: '',
         password: '',
         validationErrors: {}
     });
 
-    function createUser(event) {
-        event.preventDefault();
-
-        createUserWithEmailAndPassword(auth, registerData.email, registerData.password)
+    function createUser() {
+        createUserWithEmailAndPassword(auth, formContent.email, formContent.password)
             .then(user => {
                 setDoc(doc(database, 'profiles', user.user.uid), {
                     userId: user.user.uid,
-                    displayName: registerData.displayName,
-                    palette: {
-                        primary: {
-                            main: '#3f51b5'
-                        }
-                    },
+                    displayName: formContent.displayName,
+                    accentColor: '#3f51b5',
+                    balance: 1000.0,
                     superUser: false,
-                    registerTimestamp: serverTimestamp(),
+                    createTimestamp: serverTimestamp(),
                     updateTimestamp: serverTimestamp()
                 }).then(document => {
                     pageHistory.push('/');
                 });
             }).catch(error => {
-                setRegisterData({ ...registerData, validationErrors: { ...registerData.validationErrors, [error.code]: error } });
+                setFormContent({ ...formContent, validationErrors: { ...formContent.validationErrors, [error.code]: error } });
             });
     };
 
     function closeAlert(errorCode) {
-        let validationErrors = registerData.validationErrors;
+        let validationErrors = formContent.validationErrors;
 
         delete validationErrors[errorCode];
 
-        setRegisterData({ ...registerData, validationErrors: validationErrors });
+        setFormContent({ ...formContent, validationErrors: validationErrors });
     };
 
     return (
@@ -53,53 +48,51 @@ function RegisterPage({ auth }) {
             <Typography gutterBottom variant='h4'>
                 Registrar
             </Typography>
-            <Typography gutterBottom variant='subtitle1' style={{ marginBottom: 16 }}>
+            <Typography gutterBottom style={{ marginBottom: 16 }}>
                 Preencha o formulário abaixo para se registrar.
             </Typography>
-            {Object.keys(registerData.validationErrors).map(errorCode => {
+            {Object.keys(formContent.validationErrors).map(errorCode => {
                 return (
                     <Alert severity='error' onClose={() => closeAlert(errorCode)} style={{ marginBottom: 16 }}>
                         Ocorreu um erro ao processar sua solicitação ({errorCode}).
                     </Alert>
                 );
             })}
-            <form noValidate autoComplete='off' style={{ marginBottom: 16 }}>
-                <TextField
-                    required
-                    fullWidth
-                    autoFocus
-                    id='displayName'
-                    label='Apelido'
-                    variant='outlined'
-                    value={registerData.displayName}
-                    onChange={(event) => setRegisterData({ ...registerData, displayName: event.target.value })}
-                    style={{ marginBottom: 16 }}
-                />
-                <TextField
-                    required
-                    fullWidth
-                    id='email'
-                    label='E-mail'
-                    variant='outlined'
-                    value={registerData.email}
-                    onChange={(event) => setRegisterData({ ...registerData, email: event.target.value })}
-                    style={{ marginBottom: 16 }}
-                />
-                <TextField
-                    required
-                    fullWidth
-                    id='password'
-                    label='Senha'
-                    variant='outlined'
-                    type='password'
-                    value={registerData.password}
-                    onChange={(event) => setRegisterData({ ...registerData, password: event.target.value })}
-                    style={{ marginBottom: 16 }}
-                />
-                <Button variant='contained' color='primary' onClick={(event) => createUser(event)}>
-                    Registrar
-                </Button>
-            </form>
+            <TextField
+                required
+                fullWidth
+                autoFocus
+                id='displayName'
+                label='Apelido'
+                variant='outlined'
+                value={formContent.displayName}
+                onChange={(event) => setFormContent({ ...formContent, displayName: event.target.value })}
+                style={{ marginBottom: 16 }}
+            />
+            <TextField
+                required
+                fullWidth
+                id='email'
+                label='E-mail'
+                variant='outlined'
+                value={formContent.email}
+                onChange={(event) => setFormContent({ ...formContent, email: event.target.value })}
+                style={{ marginBottom: 16 }}
+            />
+            <TextField
+                required
+                fullWidth
+                id='password'
+                label='Senha'
+                variant='outlined'
+                type='password'
+                value={formContent.password}
+                onChange={(event) => setFormContent({ ...formContent, password: event.target.value })}
+                style={{ marginBottom: 16 }}
+            />
+            <Button variant='contained' color='primary' onClick={() => createUser()}>
+                Registrar
+            </Button>
         </Container>
     );
 };

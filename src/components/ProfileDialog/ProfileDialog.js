@@ -5,22 +5,22 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextFiel
 
 import { database } from '../../utils/settings/firebase';
 
-function ProfileDialog({ dialogData, setDialogData, auth, profile, themes }) {
-    const [profileData, setProfileData] = useState({ ...profile });
+function ProfileDialog({ dialogState, setDialogState, auth, profile, purchases }) {
+    const [dialogContent, setDialogContent] = useState({ ...profile });
 
     useEffect(() => {
-        setProfileData({ ...profile });
+        setDialogContent({ ...profile });
     }, [profile]);
 
     function closeDialog() {
-        setProfileData({ ...profile });
-        setDialogData({ ...dialogData, open: false });
+        setDialogContent({ ...profile });
+        setDialogState({ ...dialogState, open: false });
     };
 
     function updateProfile() {
         updateDoc(doc(database, 'profiles', auth.currentUser.uid), {
-            displayName: profileData.displayName,
-            palette: profileData.palette,
+            displayName: dialogContent.displayName,
+            accentColor: dialogContent.accentColor,
             updateTimestamp: serverTimestamp()
         }).then(() => {
             closeDialog();
@@ -28,15 +28,13 @@ function ProfileDialog({ dialogData, setDialogData, auth, profile, themes }) {
     };
 
     return (
-        <Dialog maxWidth='sm' fullWidth={true} open={dialogData.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogState.open} onClose={() => closeDialog()}>
             <DialogTitle>
                 Editar perfil
             </DialogTitle>
             <DialogContent>
                 <Typography gutterBottom style={{ marginBottom: 16 }}>
-                    Atualize seu perfil e preferências.
-                    <br />
-                    Visite a <MaterialLink to='/loja' component={Link}>loja de temas</MaterialLink> para visualizar mais temas.
+                    Atualize seu perfil e preferências. Mais temas estão disponíveis na <MaterialLink to='/loja' component={Link}>loja de temas</MaterialLink>.
                 </Typography>
                 <TextField
                     required
@@ -45,36 +43,41 @@ function ProfileDialog({ dialogData, setDialogData, auth, profile, themes }) {
                     id='displayName'
                     label='Apelido'
                     variant='outlined'
-                    value={profileData.displayName}
-                    onChange={(event) => setProfileData({ ...profileData, displayName: event.target.value })}
+                    value={dialogContent.displayName}
+                    onChange={(event) => setDialogContent({ ...dialogContent, displayName: event.target.value })}
                     style={{ marginBottom: 16 }}
                 />
                 <TextField
                     select
                     required
                     fullWidth
-                    id='palettePrimaryMain'
+                    id='accentColor'
                     label='Cor de destaque'
                     variant='outlined'
-                    value={profileData.palette.primary.main}
-                    onChange={(event) => setProfileData({ ...profileData, palette: { ...profileData.palette, primary: { ...profileData.palette.primary, main: event.target.value } } })}
+                    value={dialogContent.accentColor}
+                    onChange={(event) => setDialogContent({ ...dialogContent, accentColor: event.target.value })}
                     style={{ marginBottom: 16 }}
                 >
-                    {themes.map(theme => {
-                        return (
-                            <MenuItem value={theme.code}>
-                                {theme.name}
-                            </MenuItem>
-                        );
+                    <MenuItem value={'#3f51b5'}>
+                        Padrão
+                    </MenuItem>
+                    {purchases.map(purchase => {
+                        if (purchase.type === 'theme') {
+                            return (
+                                <MenuItem value={purchase.item.code}>
+                                    {purchase.item.name}
+                                </MenuItem>
+                            );
+                        };
                     })}
                 </TextField>
                 <TextField
                     disabled
                     fullWidth
-                    id='registerTimestamp'
+                    id='createTimestamp'
                     label='Data de cadastro'
                     variant='outlined'
-                    value={profileData.registerTimestamp.toDate().toLocaleDateString()}
+                    value={dialogContent.createTimestamp.toDate().toLocaleDateString()}
                 />
             </DialogContent>
             <DialogActions>
