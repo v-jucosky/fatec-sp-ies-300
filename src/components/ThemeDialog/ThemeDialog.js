@@ -1,15 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { addDoc, collection, serverTimestamp } from '@firebase/firestore';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, InputAdornment, Button } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
 
-function ThemeDialog({ dialogState, setDialogState }) {
-    const [dialogContent, setDialogContent] = useState({ name: '', code: '', description: '', price: null });
-
+function ThemeDialog({ dialogContent, setDialogContent }) {
     function closeDialog() {
-        setDialogContent({ name: '', code: '', description: '', price: null });
-        setDialogState({ ...dialogState, open: false });
+        setDialogContent({ ...dialogContent, open: false });
     };
 
     function createTheme() {
@@ -25,7 +22,7 @@ function ThemeDialog({ dialogState, setDialogState }) {
     };
 
     return (
-        <Dialog maxWidth='sm' fullWidth={true} open={dialogState.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.open} onClose={() => closeDialog()}>
             <DialogTitle>
                 Novo tema
             </DialogTitle>

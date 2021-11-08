@@ -4,9 +4,9 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button }
 
 import { database } from '../../utils/settings/firebase';
 
-function PurchaseDialog({ dialogState, setDialogState, dialogContent, auth, profile }) {
+function PurchaseDialog({ dialogContent, setDialogContent, auth, profile }) {
     function closeDialog() {
-        setDialogState({ ...dialogState, open: false });
+        setDialogContent({ ...dialogContent, open: false });
     };
 
     function purchaseItem() {
@@ -20,13 +20,13 @@ function PurchaseDialog({ dialogState, setDialogState, dialogContent, auth, prof
     };
 
     return (
-        <Dialog maxWidth='sm' fullWidth={true} open={dialogState.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.open} onClose={() => closeDialog()}>
             <DialogTitle>
                 Adquirir
             </DialogTitle>
             <DialogContent>
                 <Typography gutterBottom>
-                    Seu saldo em conta é R$ {profile.balance.toFixed(2)}. Tem certeza que deseja adquirir “{dialogContent.item?.name}” por R$ {dialogContent.item?.price.toFixed(2)}?
+                    Seu saldo em conta é R$ {profile.balance.toFixed(2)}. Tem certeza que deseja adquirir “{dialogContent.item.name}” por R$ {dialogContent.item.price.toFixed(2)}?
                 </Typography>
             </DialogContent>
             <DialogActions>

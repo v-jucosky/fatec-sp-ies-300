@@ -1,20 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { updateDoc, doc, serverTimestamp } from '@firebase/firestore';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, MenuItem, Button, Link as MaterialLink } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
+import { DEFAULT_ACCENT_COLOR, THEME } from '../../utils/settings/app';
 
-function ProfileDialog({ dialogState, setDialogState, auth, profile, purchases }) {
-    const [dialogContent, setDialogContent] = useState({ ...profile });
-
-    useEffect(() => {
-        setDialogContent({ ...profile });
-    }, [profile]);
-
+function ProfileDialog({ dialogContent, setDialogContent, auth, purchases }) {
     function closeDialog() {
-        setDialogContent({ ...profile });
-        setDialogState({ ...dialogState, open: false });
+        setDialogContent({ ...dialogContent, open: false });
     };
 
     function updateProfile() {
@@ -28,7 +22,7 @@ function ProfileDialog({ dialogState, setDialogState, auth, profile, purchases }
     };
 
     return (
-        <Dialog maxWidth='sm' fullWidth={true} open={dialogState.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.open} onClose={() => closeDialog()}>
             <DialogTitle>
                 Editar perfil
             </DialogTitle>
@@ -58,11 +52,11 @@ function ProfileDialog({ dialogState, setDialogState, auth, profile, purchases }
                     onChange={(event) => setDialogContent({ ...dialogContent, accentColor: event.target.value })}
                     style={{ marginBottom: 16 }}
                 >
-                    <MenuItem value={'#3f51b5'}>
+                    <MenuItem value={DEFAULT_ACCENT_COLOR}>
                         Padrão
                     </MenuItem>
                     {purchases.map(purchase => {
-                        if (purchase.type === 'theme') {
+                        if (purchase.type === THEME) {
                             return (
                                 <MenuItem value={purchase.item.code}>
                                     {purchase.item.name}

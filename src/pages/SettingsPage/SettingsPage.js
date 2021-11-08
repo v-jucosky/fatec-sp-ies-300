@@ -6,9 +6,9 @@ import { Delete } from '@material-ui/icons';
 import ThemeDialog from '../../components/ThemeDialog';
 import { database } from '../../utils/settings/firebase';
 
-function SettingsPage({ auth, profile, themes }) {
+function SettingsPage({ themes }) {
     const [tabState, setTabState] = useState({ index: 0 });
-    const [dialogState, setDialogState] = useState({ open: false });
+    const [themeDialogContent, setThemeDialogContent] = useState({ name: '', code: '', description: '', price: null, open: false });
 
     function deleteTheme(id) {
         deleteDoc(doc(database, 'themes', id));
@@ -75,7 +75,7 @@ function SettingsPage({ auth, profile, themes }) {
                                     </TableBody>
                                 </Table>
                             </TableContainer>
-                            <Button variant='contained' color='primary' onClick={() => setDialogState({ ...dialogState, open: true })} style={{ marginTop: 16 }}>
+                            <Button variant='contained' color='primary' onClick={() => setThemeDialogContent({ name: '', code: '', description: '', price: null, open: true })} style={{ marginTop: 16 }}>
                                 Novo tema
                             </Button>
                         </>
@@ -92,7 +92,10 @@ function SettingsPage({ auth, profile, themes }) {
                     }
                 </Box>
             </Container>
-            <ThemeDialog dialogState={dialogState} setDialogState={setDialogState} />
+            <ThemeDialog
+                dialogContent={themeDialogContent}
+                setDialogContent={setThemeDialogContent}
+            />
         </>
     );
 };

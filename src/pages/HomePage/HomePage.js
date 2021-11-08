@@ -9,7 +9,7 @@ import { database } from '../../utils/settings/firebase';
 
 function HomePage({ auth, profile, games }) {
     const pageHistory = useHistory();
-    const [dialogState, setDialogState] = useState({ open: false });
+    const [joinDialogContent, setJoinDialogContent] = useState({ id: '', open: false });
 
     function createGame() {
         addDoc(collection(database, 'games'), {
@@ -90,11 +90,14 @@ function HomePage({ auth, profile, games }) {
                 <Button variant='contained' color='primary' onClick={() => createGame()} style={{ marginRight: 16 }}>
                     Novo jogo
                 </Button>
-                <Button variant='contained' color='primary' onClick={() => setDialogState({ ...dialogState, open: true })}>
+                <Button variant='contained' color='primary' onClick={() => setJoinDialogContent({ id: '', open: true })}>
                     Entrar em um jogo
                 </Button>
             </Container>
-            <JoinDialog dialogState={dialogState} setDialogState={setDialogState} />
+            <JoinDialog
+                dialogContent={joinDialogContent}
+                setDialogContent={setJoinDialogContent}
+            />
         </>
     );
 };

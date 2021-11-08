@@ -1,18 +1,16 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, Button } from '@material-ui/core';
 
-function JoinDialog({ dialogState, setDialogState }) {
+function JoinDialog({ dialogContent, setDialogContent }) {
     const pageHistory = useHistory();
-    const [dialogContent, setDialogContent] = useState({ id: '' });
 
     function closeDialog() {
-        setDialogContent({ id: '' });
-        setDialogState({ ...dialogState, open: false });
+        setDialogContent({ ...dialogContent, open: false });
     };
 
     return (
-        <Dialog maxWidth='sm' fullWidth={true} open={dialogState.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.open} onClose={() => closeDialog()}>
             <DialogTitle>
                 Entrar em um jogo
             </DialogTitle>

@@ -2,15 +2,10 @@ import React, { useState } from 'react';
 import { Container, Typography, Card, CardContent, CardActions, Grid, Button } from '@material-ui/core';
 
 import PurchaseDialog from '../../components/PurchaseDialog';
+import { THEME } from '../../utils/settings/app';
 
 function StorePage({ auth, profile, themes, purchases }) {
-    const [dialogContent, setDialogContent] = useState({});
-    const [dialogState, setDialogState] = useState({ open: false });
-
-    function openDialog(item, type) {
-        setDialogContent({ type: type, item: { ...item } });
-        setDialogState({ ...dialogState, open: true });
-    };
+    const [purchaseDialogContent, setPurchaseDialogContent] = useState({ type: '', item: { name: '', price: 0 }, open: false });
 
     return (
         <>
@@ -38,7 +33,7 @@ function StorePage({ auth, profile, themes, purchases }) {
                                         </Typography>
                                     </CardContent>
                                     <CardActions>
-                                        <Button color='primary' size='small' disabled={purchases.map(purchase => purchase.item.id).includes(theme.id)} onClick={() => openDialog(theme, 'theme')}>
+                                        <Button color='primary' size='small' disabled={purchases.map(purchase => purchase.item.id).includes(theme.id)} onClick={() => setPurchaseDialogContent({ type: THEME, item: { ...theme }, open: true })}>
                                             {theme.price > 0 ?
                                                 'R$' + theme.price.toFixed(2)
                                                 :
@@ -52,7 +47,12 @@ function StorePage({ auth, profile, themes, purchases }) {
                     })}
                 </Grid>
             </Container>
-            <PurchaseDialog dialogState={dialogState} setDialogState={setDialogState} dialogContent={dialogContent} auth={auth} profile={profile} />
+            <PurchaseDialog
+                dialogContent={purchaseDialogContent}
+                setDialogContent={setPurchaseDialogContent}
+                auth={auth}
+                profile={profile}
+            />
         </>
     );
 };
