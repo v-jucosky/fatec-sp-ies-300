@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Switch, Route, useHistory } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
-import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, where, Timestamp } from 'firebase/firestore';
 import { AppBar, Toolbar, Container, IconButton } from '@material-ui/core';
 import { Home, AccountCircle, ExitToApp, Store, Settings } from '@material-ui/icons';
 import { MuiThemeProvider, createTheme } from '@material-ui/core/styles';
@@ -14,6 +14,7 @@ import StorePage from './pages/StorePage';
 import GamePage from './pages/GamePage';
 import ProfileDialog from './components/ProfileDialog';
 import { firebaseApp, database } from './utils/settings/firebase';
+import { DEFAULT_ACCENT_COLOR } from './utils/settings/app';
 import { arrayUpdate, objectUpdate } from './utils/utils/common';
 
 function App() {
@@ -23,7 +24,7 @@ function App() {
     const [purchases, setPurchases] = useState([]);
     const [games, setGames] = useState([]);
     const [themes, setThemes] = useState([]);
-    const [dialogState, setDialogState] = useState({ open: false });
+    const [profileDialogContent, setProfileDialogContent] = useState({ displayName: '', accentColor: DEFAULT_ACCENT_COLOR, createTimestamp: new Timestamp(), open: false });
 
     useEffect(() => {
         let unsubscribeProfile = () => { return };
@@ -67,7 +68,7 @@ function App() {
     }, []);
 
     return (
-        <MuiThemeProvider theme={createTheme({ palette: { primary: { main: profile.accentColor } } })}>
+        <MuiThemeProvider theme={createTheme({ palette: { primary: { main: profile.accentColor || DEFAULT_ACCENT_COLOR } } })}>
             {auth.currentUser ? (
                 <>
                     <AppBar position='sticky'>
@@ -84,7 +85,7 @@ function App() {
                             <IconButton color='inherit' onClick={() => pageHistory.push('/loja')}>
                                 <Store />
                             </IconButton>
-                            <IconButton color='inherit' onClick={() => setDialogState({ ...dialogState, open: true })}>
+                            <IconButton color='inherit' onClick={() => setProfileDialogContent({ ...profile, open: true })}>
                                 <AccountCircle />
                             </IconButton>
                             <IconButton color='inherit' onClick={() => signOut(auth)}>
@@ -108,7 +109,12 @@ function App() {
                             <GamePage auth={auth} profile={profile} games={games} />
                         </Route>
                     </Switch>
-                    <ProfileDialog dialogState={dialogState} setDialogState={setDialogState} auth={auth} profile={profile} purchases={purchases} />
+                    <ProfileDialog
+                        dialogContent={profileDialogContent}
+                        setDialogContent={setProfileDialogContent}
+                        auth={auth}
+                        purchases={purchases}
+                    />
                 </>
             ) : (
                 <>

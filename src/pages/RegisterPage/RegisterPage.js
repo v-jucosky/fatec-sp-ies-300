@@ -6,6 +6,7 @@ import { Container, Typography, Button, TextField } from '@material-ui/core';
 import { Alert } from '@material-ui/lab';
 
 import { database } from '../../utils/settings/firebase';
+import { DEFAULT_ACCENT_COLOR } from '../../utils/settings/app';
 
 function RegisterPage({ auth }) {
     const pageHistory = useHistory();
@@ -22,7 +23,7 @@ function RegisterPage({ auth }) {
                 setDoc(doc(database, 'profiles', user.user.uid), {
                     userId: user.user.uid,
                     displayName: formContent.displayName,
-                    accentColor: '#3f51b5',
+                    accentColor: DEFAULT_ACCENT_COLOR,
                     balance: 1000.0,
                     superUser: false,
                     createTimestamp: serverTimestamp(),
