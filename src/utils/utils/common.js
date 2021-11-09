@@ -2,18 +2,24 @@ function arrayUpdate(snapshot, array, setArray) {
     snapshot.docChanges()
         .forEach(change => {
             if (change.type === 'added') {
-                console.log('added');
+                console.log('Added object to array: ', change.doc.data());
+
                 setArray(content => [...content, { id: change.doc.id, ...change.doc.data() }]);
             } else if (change.type === 'removed') {
-                console.log('removed');
+                console.log('Removed object from array: ', change.doc.data());
+
                 setArray(content => content.filter(object => object.id !== change.doc.id));
             } else if (change.type === 'modified') {
-                console.log('modified');
+                console.log('Modified object in array: ', change.doc.data());
+
+                setArray(content => content.map(object => object.id === change.doc.id ? { id: change.doc.id, ...change.doc.data() } : object));
             };
         });
 };
 
 function objectUpdate(snapshot, object, setObject) {
+    console.log('Updated object: ', snapshot.data());
+
     setObject(snapshot.data());
 };
 

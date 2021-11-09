@@ -1,42 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
-import { doc, addDoc, getDoc, setDoc, updateDoc, onSnapshot, arrayUnion, arrayRemove, collection, query, increment, serverTimestamp } from 'firebase/firestore';
+import { doc, addDoc, getDoc, setDoc, updateDoc, onSnapshot, arrayUnion, arrayRemove, collection, query, where, increment, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { Container, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, CardContent, CardActions } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
-import { buildSleep, getTileFromSleep, DECK_MAXIMUM_SIZE, PLAYER_LIMIT } from '../../utils/shared/game';
+import { arrayUpdate, objectUpdate } from '../../utils/utils/common';
+import { buildSleep, getTileFromSleep, DECK_MAXIMUM_SIZE, PLAYER_LIMIT } from '../../utils/utils/game';
+import { SYSTEM_PLAYER } from '../../utils/settings/app';
 
-function GamePage({ auth, profile }) {
+function GamePage({ auth, profile, games }) {
     const pageHistory = useHistory();
     const { gameId } = useParams();
-    const [players, setPlayers] = useState([{ ...profile }]);
-    const [moves, setMoves] = useState([]);
     const [deck, setDeck] = useState({});
-    const [game, setGame] = useState({
-        owner: '',
-        currentPlayer: '',
-        players: [],
-        sleep: [],
-        moveCount: 0,
-        createTimestamp: '',
-        running: undefined,
-        open: undefined
-    });
+    const [moves, setMoves] = useState([]);
+    const [profiles, setProfiles] = useState([]);
+    const [game, setGame] = useState({ id: '', owner: '', currentPlayer: '', players: [], sleep: [], moves: 0, running: undefined, open: undefined, createTimestamp: new Timestamp() });
 
     useEffect(() => {
         getDoc(doc(database, 'games', gameId))
             .then(document => {
-                try {
-                    let game = document.data();
+                let game = document.data();
 
+                try {
                     if (!game.players.includes(auth.currentUser.uid)) {
                         if (!game.open) {
                             alert('Este jogo não está aberto.');
                             pageHistory.push('/');
+                            return;
                         } else if (game.players.length >= PLAYER_LIMIT) {
                             alert('Número máximo de jogadores atingido.');
                             pageHistory.push('/');
+                            return;
                         } else {
                             updateDoc(doc(database, 'games', gameId), {
                                 players: arrayUnion(auth.currentUser.uid)
@@ -44,45 +39,44 @@ function GamePage({ auth, profile }) {
                         };
                     };
                 } catch (error) {
-                    alert('Não foi possível entrar neste jogo.');
+                    alert('Não foi possível entrar neste jogo (' + error + ').');
                     pageHistory.push('/');
+                    return;
                 };
             });
 
-        const unsubscribeGame = onSnapshot(doc(database, 'games', gameId), snapshot => {
-            let game = snapshot.data();
-            let existingPlayers = players.map(player => player.userId);
-            let newPlayers = game.players.filter(player => !existingPlayers.includes(player));
-
-            newPlayers.forEach(newPlayer => {
-                getDoc(doc(database, 'profiles', newPlayer))
-                    .then(document => {
-                        setPlayers(content => [content, { userId: document.id, ...document.data() }]);
-                    });
-            });
-
-            setGame(game);
+        const unsubscribeDeck = onSnapshot(doc(database, 'games', gameId, 'decks', auth.currentUser.uid), snapshot => {
+            objectUpdate(snapshot, deck, setDeck);
         });
 
         const unsubscribeMoves = onSnapshot(query(collection(database, 'games', gameId, 'moves')), snapshot => {
-            snapshot.docChanges()
-                .forEach(change => {
-                    if (change.type === 'added') {
-                        setMoves(content => [...content, change.doc.data()]);
-                    };
-                });
-        });
-
-        const unsubscribeDeck = onSnapshot(doc(database, 'games', gameId, 'decks', auth.currentUser.uid), snapshot => {
-            setDeck(snapshot.data());
+            arrayUpdate(snapshot, moves, setMoves);
         });
 
         return (() => {
             unsubscribeDeck();
-            unsubscribeGame();
             unsubscribeMoves();
         });
     }, []);
+
+    useEffect(() => {
+        let unsubscribeProfiles = () => { return };
+        let game = games.filter(game => game.id === gameId)[0];
+
+        if (game) {
+            setGame(game);
+
+            if (game.players.length !== profiles.length) {
+                setProfiles([]);
+
+                unsubscribeProfiles = onSnapshot(query(collection(database, 'profiles'), where('userId', 'in', game.players)), snapshot => {
+                    arrayUpdate(snapshot, profiles, setProfiles);
+                });
+            };
+        };
+
+        return unsubscribeProfiles;
+    }, [games]);
 
     function startGame() {
         let sleep = buildSleep();
@@ -101,16 +95,16 @@ function GamePage({ auth, profile }) {
 
         addDoc(collection(database, 'games', gameId, 'moves'), {
             move: 1,
-            player: auth.currentUser.uid,
+            player: SYSTEM_PLAYER,
             tile: getTileFromSleep(sleep),
-            onTimestamp: serverTimestamp()
+            createTimestamp: serverTimestamp()
         });
 
         updateDoc(doc(database, 'games', gameId), {
             sleep: sleep,
             open: false,
             running: true,
-            moveCount: increment(1)
+            moves: increment(1)
         });
     };
 
@@ -125,10 +119,10 @@ function GamePage({ auth, profile }) {
         };
 
         addDoc(collection(database, 'games', gameId, 'moves'), {
-            move: game.moveCount + 1,
+            move: game.moves + 1,
             player: auth.currentUser.uid,
             tile: tile,
-            onTimestamp: serverTimestamp()
+            createTimestamp: serverTimestamp()
         });
 
         updateDoc(doc(database, 'games', gameId, 'decks', auth.currentUser.uid), {
@@ -155,27 +149,27 @@ function GamePage({ auth, profile }) {
 
     return (
         <>
-            <Container maxWidth='md' style={{ marginTop: 64 }}>
+            <Container maxWidth='md' style={{ marginTop: 64, marginBottom: 64 }}>
                 <Typography gutterBottom variant='h4'>
                     {gameId}
                 </Typography>
-                {players.map(player => {
+                {profiles.map(profile => {
                     return (
                         <Chip
-                            label={player.displayName}
+                            label={profile.displayName}
                             avatar={<Avatar />}
                             style={{ marginRight: 8, marginBottom: 8 }}
                         />
                     );
                 })}
                 {game.owner === auth.currentUser.uid &&
-                    <Card style={{ marginTop: 8, marginBottom: 16 }}>
+                    <Card style={{ marginTop: 8, marginBottom: 8 }}>
                         <CardContent>
                             <Typography gutterBottom variant='h6'>
                                 Painel do administrador
                             </Typography>
                             <Typography gutterBottom>
-                                Este painel só é visível a você, {profile.displayName}, por ter iniciado o jogo. Quando todos os jogadores entrarem, clique em “Iniciar jogo” para iniciar a partida.
+                                Este painel só é visível a você, {profile.displayName}, por ter iniciado o jogo. Quando todos os jogadores entrarem, clique em “Iniciar” para iniciar o jogo.
                             </Typography>
                         </CardContent>
                         <CardActions>
@@ -183,12 +177,12 @@ function GamePage({ auth, profile }) {
                                 Copiar ID
                             </Button>
                             <Button color='primary' onClick={() => startGame()} disabled={!game.open}>
-                                Iniciar jogo
+                                Iniciar
                             </Button>
                         </CardActions>
                     </Card>
                 }
-                <Card style={{ marginTop: 8, marginBottom: 24 }}>
+                <Card style={{ marginTop: 8, marginBottom: 16 }}>
                     <CardContent>
                         <Typography gutterBottom variant='h6'>
                             Meu deck
