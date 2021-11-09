@@ -9,7 +9,7 @@ Construir um jogo de dominó online multijogador, que deverá possuir:
 - [x] Autenticação de usuários
 - [x] Perfis de usuários (apelido, preferências, etc.)
 - [x] Capacidade de personalização através de um “super usuário”
-- [ ] Recursos monetizáveis
+- [x] Recursos monetizáveis
 - [ ] Funcionalidade básica do jogo
 - [ ] (Extra) Chat entre jogadores de uma mesma partida
 
@@ -47,15 +47,16 @@ Em todos os casos, um simples jogo de dominó não irá atingir estas taxas.
 Stack utilizada:
 
 * React
-* Firebase Authentication
-* Firebase Cloud Firestore
+* Firebase Authentication e Cloud Firestore
 
 Ferramentas utilizadas no desenvolvimento:
 
 * Visual Studio Code
 * Git
 
-Bibliotecas de componentes:
+Bibliotecas:
 
+* React Router
+* Firebase
 * Material UI
 * Material UI Icons
