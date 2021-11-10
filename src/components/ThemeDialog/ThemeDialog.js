@@ -1,5 +1,5 @@
 import React from 'react';
-import { addDoc, collection, serverTimestamp } from '@firebase/firestore';
+import { addDoc, updateDoc, collection, serverTimestamp, doc } from '@firebase/firestore';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, InputAdornment, Button } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
@@ -15,7 +15,18 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
             code: '#' + dialogContent.code,
             description: dialogContent.description,
             price: parseFloat(parseFloat(dialogContent.price).toFixed(2)),
-            createTimestamp: serverTimestamp()
+            createTimestamp: serverTimestamp(),
+            updateTimestamp: serverTimestamp()
+        }).then(() => {
+            closeDialog();
+        });
+    };
+
+    function updateTheme() {
+        updateDoc(doc(database, 'themes', dialogContent.id), {
+            description: dialogContent.description,
+            price: parseFloat(parseFloat(dialogContent.price).toFixed(2)),
+            updateTimestamp: serverTimestamp()
         }).then(() => {
             closeDialog();
         });
@@ -24,11 +35,19 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
     return (
         <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.open} onClose={() => closeDialog()}>
             <DialogTitle>
-                Novo tema
+                {'id' in dialogContent ?
+                    'Editar tema'
+                    :
+                    'Novo tema'
+                }
             </DialogTitle>
             <DialogContent>
                 <Typography gutterBottom style={{ marginBottom: 16 }}>
-                    Crie um novo tema, que ficará disponível aos jogadores através da loja.
+                    {'id' in dialogContent ?
+                        'Edite a descrição e valor do tema.'
+                        :
+                        'Crie um novo tema, que ficará disponível aos jogadores através da loja.'
+                    }
                 </Typography>
                 <TextField
                     required
@@ -37,6 +56,7 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
                     id='name'
                     label='Nome'
                     variant='outlined'
+                    disabled={'id' in dialogContent}
                     value={dialogContent.name}
                     onChange={(event) => setDialogContent({ ...dialogContent, name: event.target.value })}
                     style={{ marginBottom: 16 }}
@@ -47,6 +67,7 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
                     id='code'
                     label='Código'
                     variant='outlined'
+                    disabled={'id' in dialogContent}
                     value={dialogContent.code}
                     onChange={(event) => setDialogContent({ ...dialogContent, code: event.target.value })}
                     InputProps={{ startAdornment: <InputAdornment position='start'>#</InputAdornment> }}
@@ -79,7 +100,7 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
                 <Button color='primary' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
-                <Button color='primary' disabled={!(dialogContent.code.length === 6 && dialogContent.name.length > 0 && dialogContent.price)} onClick={() => createTheme()}>
+                <Button color='primary' disabled={!(dialogContent.code.length === 6 && dialogContent.name.length > 0 && dialogContent.price)} onClick={() => 'id' in dialogContent ? updateTheme() : createTheme()}>
                     Salvar
                 </Button>
             </DialogActions>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { doc, addDoc, deleteDoc, serverTimestamp, collection } from 'firebase/firestore';
-import { Container, Typography, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper } from '@material-ui/core';
+import { Container, Typography, IconButton, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper } from '@material-ui/core';
 import { Delete, PlayArrow, Visibility } from '@material-ui/icons';
 
 import JoinDialog from '../../components/JoinDialog';
@@ -52,6 +52,9 @@ function HomePage({ auth, profile, games }) {
                                     ID
                                 </TableCell>
                                 <TableCell>
+                                    Data de início
+                                </TableCell>
+                                <TableCell>
                                     Jogadores
                                 </TableCell>
                                 <TableCell>
@@ -67,19 +70,22 @@ function HomePage({ auth, profile, games }) {
                                             {game.id}
                                         </TableCell>
                                         <TableCell>
+                                            {game.createTimestamp.toDate().toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell>
                                             {game.players.length}
                                         </TableCell>
                                         <TableCell>
-                                            <Button size='small' variant='contained' color='primary' onClick={() => pageHistory.push('/jogo/' + game.id)} style={{ marginRight: 16 }}>
+                                            <IconButton size='small' variant='contained' color='primary' onClick={() => pageHistory.push('/jogo/' + game.id)} style={{ marginRight: 4 }}>
                                                 {(game.running || game.open) ?
                                                     <PlayArrow />
                                                     :
                                                     <Visibility />
                                                 }
-                                            </Button>
-                                            <Button size='small' variant='contained' color='secondary' disabled={game.owner !== auth.currentUser.uid} onClick={() => deleteGame(game.id)}>
+                                            </IconButton>
+                                            <IconButton size='small' variant='contained' color='secondary' disabled={game.owner !== auth.currentUser.uid} onClick={() => deleteGame(game.id)}>
                                                 <Delete />
-                                            </Button>
+                                            </IconButton>
                                         </TableCell>
                                     </TableRow>
                                 );

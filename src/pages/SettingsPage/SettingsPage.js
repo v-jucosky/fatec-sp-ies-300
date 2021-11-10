@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { doc, deleteDoc } from 'firebase/firestore';
-import { Container, Typography, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper, Box, Tabs, Tab } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
+import { Container, Typography, IconButton, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper, Box, Tabs, Tab } from '@material-ui/core';
+import { Delete, Edit } from '@material-ui/icons';
 
 import ThemeDialog from '../../components/ThemeDialog';
 import { database } from '../../utils/settings/firebase';
@@ -32,7 +32,7 @@ function SettingsPage({ themes }) {
                                     Temas
                                 </Typography>
                                 <Typography gutterBottom style={{ margin: 16 }}>
-                                    Temas não podem ser editados, pois são itens comercializados aos usuários da plataforma. Excluir um tema não o remove dos usuários que o adquiriram.
+                                    O nome e a cor dos temas não podem ser editados, pois são itens comercializados aos usuários da plataforma. Excluir um tema não o remove dos usuários que o adquiriram.
                                 </Typography>
                                 <Table>
                                     <TableHead>
@@ -62,12 +62,15 @@ function SettingsPage({ themes }) {
                                                         {theme.code}
                                                     </TableCell>
                                                     <TableCell>
-                                                        R$ {theme.price.toFixed(2)}
+                                                        R${theme.price.toFixed(2)}
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Button size='small' variant='contained' color='secondary' onClick={() => deleteTheme(theme.id)}>
+                                                        <IconButton size='small' variant='contained' color='primary' onClick={() => setThemeDialogContent({ ...theme, code: theme.code.substring(1), open: true })} style={{ marginRight: 4 }}>
+                                                            <Edit />
+                                                        </IconButton>
+                                                        <IconButton size='small' variant='contained' color='secondary' onClick={() => deleteTheme(theme.id)}>
                                                             <Delete />
-                                                        </Button>
+                                                        </IconButton>
                                                     </TableCell>
                                                 </TableRow>
                                             );
