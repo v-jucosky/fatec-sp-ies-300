@@ -4,11 +4,13 @@ import { Container, Typography, IconButton, Button, Table, TableHead, TableRow, 
 import { Delete, Edit } from '@material-ui/icons';
 
 import ThemeDialog from '../../components/ThemeDialog';
+import DeleteDialog from '../../components/DeleteDialog';
 import { database } from '../../utils/settings/firebase';
 
 function SettingsPage({ themes }) {
     const [tabState, setTabState] = useState({ index: 0 });
     const [themeDialogContent, setThemeDialogContent] = useState({ name: '', code: '', description: '', price: null, open: false });
+    const [deleteDialogContent, setDeleteDialogContent] = useState({ name: '', onDelete: undefined, open: false });
 
     function deleteTheme(id) {
         deleteDoc(doc(database, 'themes', id));
@@ -68,7 +70,7 @@ function SettingsPage({ themes }) {
                                                         <IconButton size='small' variant='contained' color='primary' onClick={() => setThemeDialogContent({ ...theme, code: theme.code.substring(1), open: true })} style={{ marginRight: 4 }}>
                                                             <Edit />
                                                         </IconButton>
-                                                        <IconButton size='small' variant='contained' color='secondary' onClick={() => deleteTheme(theme.id)}>
+                                                        <IconButton size='small' variant='contained' color='secondary' onClick={() => setDeleteDialogContent({ name: theme.name, onDelete: () => deleteTheme(theme.id), open: true })}>
                                                             <Delete />
                                                         </IconButton>
                                                     </TableCell>
@@ -98,6 +100,10 @@ function SettingsPage({ themes }) {
             <ThemeDialog
                 dialogContent={themeDialogContent}
                 setDialogContent={setThemeDialogContent}
+            />
+            <DeleteDialog
+                dialogContent={deleteDialogContent}
+                setDialogContent={setDeleteDialogContent}
             />
         </>
     );

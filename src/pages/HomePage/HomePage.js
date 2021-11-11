@@ -5,11 +5,13 @@ import { Container, Typography, IconButton, Button, Table, TableHead, TableRow, 
 import { Delete, PlayArrow, Visibility } from '@material-ui/icons';
 
 import JoinDialog from '../../components/JoinDialog';
+import DeleteDialog from '../../components/DeleteDialog';
 import { database } from '../../utils/settings/firebase';
 
 function HomePage({ auth, profile, games }) {
     const pageHistory = useHistory();
     const [joinDialogContent, setJoinDialogContent] = useState({ id: '', open: false });
+    const [deleteDialogContent, setDeleteDialogContent] = useState({ name: '', onDelete: undefined, open: false });
 
     function createGame() {
         addDoc(collection(database, 'games'), {
@@ -22,7 +24,8 @@ function HomePage({ auth, profile, games }) {
             moves: 0,
             running: false,
             open: true,
-            createTimestamp: serverTimestamp()
+            createTimestamp: serverTimestamp(),
+            updateTimestamp: serverTimestamp()
         }).then(document => {
             pageHistory.push('/jogo/' + document.id);
         });
@@ -70,7 +73,7 @@ function HomePage({ auth, profile, games }) {
                                             {game.id}
                                         </TableCell>
                                         <TableCell>
-                                            {game.createTimestamp.toDate().toLocaleDateString()}
+                                            {game.createTimestamp?.toDate().toLocaleDateString()}
                                         </TableCell>
                                         <TableCell>
                                             {game.players.length}
@@ -83,7 +86,7 @@ function HomePage({ auth, profile, games }) {
                                                     <Visibility />
                                                 }
                                             </IconButton>
-                                            <IconButton size='small' variant='contained' color='secondary' disabled={game.owner !== auth.currentUser.uid} onClick={() => deleteGame(game.id)}>
+                                            <IconButton size='small' variant='contained' color='secondary' disabled={game.owner !== auth.currentUser.uid} onClick={() => setDeleteDialogContent({ name: game.id, onDelete: () => deleteGame(game.id), open: true })}>
                                                 <Delete />
                                             </IconButton>
                                         </TableCell>
@@ -103,6 +106,10 @@ function HomePage({ auth, profile, games }) {
             <JoinDialog
                 dialogContent={joinDialogContent}
                 setDialogContent={setJoinDialogContent}
+            />
+            <DeleteDialog
+                dialogContent={deleteDialogContent}
+                setDialogContent={setDeleteDialogContent}
             />
         </>
     );
