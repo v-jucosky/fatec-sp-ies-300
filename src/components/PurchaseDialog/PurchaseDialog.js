@@ -26,14 +26,14 @@ function PurchaseDialog({ dialogContent, setDialogContent, auth, profile }) {
             </DialogTitle>
             <DialogContent>
                 <Typography gutterBottom>
-                    Seu saldo em conta é R$ {profile.balance.toFixed(2)}. Tem certeza que deseja adquirir “{dialogContent.item.name}” por R$ {dialogContent.item.price.toFixed(2)}?
+                    Seu saldo em conta é R${profile.balance.toFixed(2)}. Tem certeza que deseja adquirir “{dialogContent.item.name}” por R${dialogContent.item.price.toFixed(2)}?
                 </Typography>
             </DialogContent>
             <DialogActions>
                 <Button color='primary' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
-                <Button color='secondary' onClick={() => purchaseItem()}>
+                <Button color='primary' onClick={() => purchaseItem()}>
                     Adquirir
                 </Button>
             </DialogActions>

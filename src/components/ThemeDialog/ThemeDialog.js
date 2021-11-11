@@ -17,7 +17,7 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
             price: parseFloat(parseFloat(dialogContent.price).toFixed(2)),
             createTimestamp: serverTimestamp(),
             updateTimestamp: serverTimestamp()
-        }).then(() => {
+        }).then(document => {
             closeDialog();
         });
     };
