@@ -32,4 +32,15 @@ function getTileFromSleep(sleep) {
     return tile;
 };
 
-export { DECK_MAXIMUM_SIZE, PLAYER_LIMIT, buildSleep, getTileFromSleep };
+function flipTile(tile) {
+    let _tile = Object.assign({}, tile);
+
+    tile.leftString = _tile.rightString;
+    tile.leftNumber = _tile.rightNumber;
+    tile.rightString = _tile.leftString;
+    tile.rightNumber = _tile.leftNumber;
+
+    return _tile;
+};
+
+export { DECK_MAXIMUM_SIZE, PLAYER_LIMIT, buildSleep, getTileFromSleep, flipTile };

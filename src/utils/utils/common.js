@@ -1,10 +1,18 @@
-function arrayUpdate(snapshot, array, setArray) {
+function arrayUpdate(snapshot, array, setArray, index) {
     snapshot.docChanges()
         .forEach(change => {
             if (change.type === 'added') {
-                console.log('Added object to array: ', change.doc.data());
+                if (index) {
+                    console.log('Added object to sorted array: ', change.doc.data());
 
-                setArray(content => [...content, { id: change.doc.id, ...change.doc.data() }]);
+                    setArray(content => [...content, { id: change.doc.id, ...change.doc.data() }].sort((a, b) => {
+                        return parseInt(a[index]) - parseInt(b[index]);
+                    }));
+                } else {
+                    console.log('Added object to array: ', change.doc.data());
+
+                    setArray(content => [...content, { id: change.doc.id, ...change.doc.data() }]);
+                };
             } else if (change.type === 'removed') {
                 console.log('Removed object from array: ', change.doc.data());
 

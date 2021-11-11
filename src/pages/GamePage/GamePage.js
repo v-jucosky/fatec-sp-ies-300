@@ -6,13 +6,13 @@ import { Container, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, Ca
 
 import { database } from '../../utils/settings/firebase';
 import { arrayUpdate, objectUpdate } from '../../utils/utils/common';
-import { buildSleep, getTileFromSleep, DECK_MAXIMUM_SIZE, PLAYER_LIMIT } from '../../utils/utils/game';
+import { buildSleep, getTileFromSleep, flipTile, DECK_MAXIMUM_SIZE, PLAYER_LIMIT } from '../../utils/utils/game';
 import { SYSTEM_PLAYER } from '../../utils/settings/app';
 
 function GamePage({ auth, profile, games }) {
     const pageHistory = useHistory();
     const { gameId } = useParams();
-    const [deck, setDeck] = useState({});
+    const [deck, setDeck] = useState({ tiles: [] });
     const [moves, setMoves] = useState([]);
     const [profiles, setProfiles] = useState([]);
     const [game, setGame] = useState({ id: '', owner: '', currentPlayer: '', players: [], sleep: [], moves: 0, running: undefined, open: undefined, createTimestamp: new Timestamp() });
@@ -50,7 +50,7 @@ function GamePage({ auth, profile, games }) {
         });
 
         const unsubscribeMoves = onSnapshot(query(collection(database, 'games', gameId, 'moves')), snapshot => {
-            arrayUpdate(snapshot, moves, setMoves);
+            arrayUpdate(snapshot, moves, setMoves, 'index');
         });
 
         return (() => {
@@ -95,6 +95,7 @@ function GamePage({ auth, profile, games }) {
 
         addDoc(collection(database, 'games', gameId, 'moves'), {
             move: 1,
+            index: 0,
             player: SYSTEM_PLAYER,
             tile: getTileFromSleep(sleep),
             createTimestamp: serverTimestamp()
@@ -109,8 +110,26 @@ function GamePage({ auth, profile, games }) {
     };
 
     function moveTile(tile) {
+        const lastLeftMove = moves.at(0);
+        const lastRightMove = moves.at(-1);
         let currentPlayer = game.players.indexOf(auth.currentUser.uid);
         let nextPlayer = undefined;
+        let tileIndex = undefined;
+        let _tile = undefined;
+
+        if (lastRightMove.tile.rightNumber === tile.leftNumber) {
+            tileIndex = lastRightMove.index + 1;
+        } else if (lastLeftMove.tile.leftNumber === tile.rightNumber) {
+            tileIndex = lastLeftMove.index - 1;
+        } else if (lastRightMove.tile.rightNumber === tile.rightNumber) {
+            _tile = flipTile(tile);
+            tileIndex = lastRightMove.index + 1;
+        } else if (lastLeftMove.tile.leftNumber === tile.leftNumber) {
+            _tile = flipTile(tile);
+            tileIndex = lastLeftMove.index - 1;
+        } else {
+            return;
+        };
 
         if (currentPlayer >= game.players.length - 1) {
             nextPlayer = game.players[0];
@@ -120,18 +139,21 @@ function GamePage({ auth, profile, games }) {
 
         addDoc(collection(database, 'games', gameId, 'moves'), {
             move: game.moves + 1,
+            index: tileIndex,
             player: auth.currentUser.uid,
             tile: tile,
             createTimestamp: serverTimestamp()
         });
 
         updateDoc(doc(database, 'games', gameId, 'decks', auth.currentUser.uid), {
-            tiles: arrayRemove(tile)
+            tiles: arrayRemove(_tile || tile),
+            updateTimestamp: serverTimestamp()
         });
 
         updateDoc(doc(database, 'games', gameId), {
             moveCount: increment(1),
-            currentPlayer: nextPlayer
+            currentPlayer: nextPlayer,
+            updateTimestamp: serverTimestamp()
         });
     };
 
@@ -185,22 +207,19 @@ function GamePage({ auth, profile, games }) {
                 <Card style={{ marginTop: 8, marginBottom: 16 }}>
                     <CardContent>
                         <Typography gutterBottom variant='h6'>
-                            Meu deck
+                            Deck
                         </Typography>
-                        {!deck?.tiles &&
-                            <Typography gutterBottom>
-                                Você receberá suas peças aqui quando o administrador do jogo iniciar a partida.
-                            </Typography>
-                        }
-                        {deck?.tiles &&
-                            <Typography gutterBottom>
-                                As peças ficarão disponíveis quando for a sua vez de jogar.
-                            </Typography>
-                        }
+                        <Typography gutterBottom>
+                            {game.open ?
+                                'Você receberá suas peças aqui quando o administrador do jogo iniciar a partida.'
+                                :
+                                'As peças ficarão disponíveis quando for a sua vez de jogar.'
+                            }
+                        </Typography>
                     </CardContent>
-                    {deck?.tiles &&
+                    {deck?.tiles.length > 0 &&
                         <CardActions>
-                            {deck.tiles.map(tile => {
+                            {deck?.tiles.map(tile => {
                                 return (
                                     <ButtonGroup color='primary' disabled={game.currentPlayer !== auth.currentUser.uid} onClick={() => moveTile(tile)}>
                                         <Button>{tile.leftString}</Button>
@@ -212,6 +231,8 @@ function GamePage({ auth, profile, games }) {
                     }
                 </Card>
                 {moves.map(move => {
+                    //console.log('MOOOOOOOOOOOOOOOOOOOOOOOOVES')
+                    //console.log(moves)
                     return (
                         <ButtonGroup color='primary' variant='contained' style={{ marginRight: 16, marginBottom: 16 }}>
                             <Button>{move.tile.leftString}</Button>
