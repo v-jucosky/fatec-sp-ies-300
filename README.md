@@ -24,21 +24,22 @@ As bibliotecas disponíveis permitem que esses recursos sejam consumidos diretam
 A escolha pelo Firebase foi feita levando-se em conta os requisitos relativamente simples do projeto e os limites recomendados da plataforma: em uma partida de dominó, poucos jogadores estão envolvidos e o tabuleiro, bem como as regras do jogo, são simples. Assim, optou-se pela criação dos seguintes listeners globais:
 
 * Jogos que o usuário particia
-* Temas disponíveis para customização
+* Compras realizadas pelo usuário
+* Temas disponíveis na loja
 * Perfil do usuário
+* Autenticação do usuário
 
 Ao entrar em um jogo, são criados os seguintes listeners locais:
 
-* Jogo atual, que contém as peças no dorme e metadados adicionais
+* Jogadas
 * Peças do jogador
-* Peças colocadas no tabuleiro
-* Perfil dos jogadores na partida
+* Perfis dos jogadores na partida
 
 A criação de vários listeners, embora deva ser usada com cuidado, é uma prática incentivada na arquitetura Firebase. Os principais limites do Cloud Firestore são:
 
-* Cem listeners ativos por aplicação
+* 100 listeners ativos por aplicação
 * Taxa de push inferior a 1 documento ou 10 kilibytes por segundo
-* No máximo uma atualização por segundo para cada documento
+* No máximo uma atualização por segundo em cada documento
 
 Em todos os casos, um simples jogo de dominó não irá atingir estas taxas.
 
