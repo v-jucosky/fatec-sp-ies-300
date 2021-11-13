@@ -1,12 +1,8 @@
-const TILE_MAXIMUM_NUMBER = 3;
-const DECK_MAXIMUM_SIZE = 3;
-const PLAYER_LIMIT = 2;
-
-function buildSleep() {
+function buildSleep(size) {
     let sleep = [];
 
-    for (let i = 0; i <= TILE_MAXIMUM_NUMBER; i++) {
-        for (let j = i; j <= TILE_MAXIMUM_NUMBER; j++) {
+    for (let i = 0; i <= size; i++) {
+        for (let j = i; j <= size; j++) {
             let x = i.toString();
             let y = j.toString();
 
@@ -43,4 +39,4 @@ function flipTile(tile) {
     return _tile;
 };
 
-export { DECK_MAXIMUM_SIZE, PLAYER_LIMIT, buildSleep, getTileFromSleep, flipTile };
+export { buildSleep, getTileFromSleep, flipTile };
