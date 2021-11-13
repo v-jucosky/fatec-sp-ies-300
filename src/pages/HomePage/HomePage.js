@@ -1,35 +1,19 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { doc, addDoc, deleteDoc, serverTimestamp, collection } from 'firebase/firestore';
+import { doc, deleteDoc } from 'firebase/firestore';
 import { Container, Typography, IconButton, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper } from '@material-ui/core';
 import { Delete, PlayArrow, Visibility } from '@material-ui/icons';
 
 import JoinDialog from '../../components/JoinDialog';
+import GameDialog from '../../components/GameDialog';
 import DeleteDialog from '../../components/DeleteDialog';
 import { database } from '../../utils/settings/firebase';
 
 function HomePage({ auth, profile, games }) {
     const pageHistory = useHistory();
     const [joinDialogContent, setJoinDialogContent] = useState({ id: '', open: false });
+    const [gameDialogContent, setGameDialogContent] = useState({ name: '', size: 6, open: false });
     const [deleteDialogContent, setDeleteDialogContent] = useState({ name: '', onDelete: undefined, open: false });
-
-    function createGame() {
-        addDoc(collection(database, 'games'), {
-            owner: auth.currentUser.uid,
-            currentPlayer: auth.currentUser.uid,
-            players: [
-                auth.currentUser.uid
-            ],
-            sleep: [],
-            moves: 0,
-            running: false,
-            open: true,
-            createTimestamp: serverTimestamp(),
-            updateTimestamp: serverTimestamp()
-        }).then(document => {
-            pageHistory.push('/jogo/' + document.id);
-        });
-    };
 
     function deleteGame(id) {
         deleteDoc(doc(database, 'games', id));
@@ -96,7 +80,7 @@ function HomePage({ auth, profile, games }) {
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <Button variant='contained' color='primary' onClick={() => createGame()} style={{ marginRight: 16 }}>
+                <Button variant='contained' color='primary' onClick={() => setGameDialogContent({ name: '', size: '6', open: true })} style={{ marginRight: 16 }}>
                     Novo jogo
                 </Button>
                 <Button variant='contained' color='primary' onClick={() => setJoinDialogContent({ id: '', open: true })}>
@@ -106,6 +90,11 @@ function HomePage({ auth, profile, games }) {
             <JoinDialog
                 dialogContent={joinDialogContent}
                 setDialogContent={setJoinDialogContent}
+            />
+            <GameDialog
+                dialogContent={gameDialogContent}
+                setDialogContent={setGameDialogContent}
+                auth={auth}
             />
             <DeleteDialog
                 dialogContent={deleteDialogContent}

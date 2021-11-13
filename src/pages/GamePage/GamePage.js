@@ -6,8 +6,8 @@ import { Container, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, Ca
 
 import { database } from '../../utils/settings/firebase';
 import { arrayUpdate, objectUpdate } from '../../utils/utils/common';
-import { buildSleep, getTileFromSleep, flipTile, DECK_MAXIMUM_SIZE, PLAYER_LIMIT } from '../../utils/utils/game';
-import { SYSTEM_PLAYER } from '../../utils/settings/app';
+import { buildSleep, getTileFromSleep, flipTile } from '../../utils/utils/game';
+import { DECK_START_SIZE, MAXIMUM_NUMBER_PLAYERS, SYSTEM_PLAYER_DISPLAY_NAME } from '../../utils/settings/app';
 
 function GamePage({ auth, profile, games }) {
     const pageHistory = useHistory();
@@ -28,7 +28,7 @@ function GamePage({ auth, profile, games }) {
                             alert('Este jogo não está aberto.');
                             pageHistory.push('/');
                             return;
-                        } else if (game.players.length >= PLAYER_LIMIT) {
+                        } else if (game.players.length >= MAXIMUM_NUMBER_PLAYERS) {
                             alert('Número máximo de jogadores atingido.');
                             pageHistory.push('/');
                             return;
@@ -79,12 +79,12 @@ function GamePage({ auth, profile, games }) {
     }, [games]);
 
     function startGame() {
-        let sleep = buildSleep();
+        let sleep = buildSleep(game.size);
 
         game.players.forEach(player => {
             let tiles = [];
 
-            for (let i = 0; i < DECK_MAXIMUM_SIZE; i++) {
+            for (let i = 0; i < DECK_START_SIZE; i++) {
                 tiles.push(getTileFromSleep(sleep));
             };
 
@@ -96,7 +96,7 @@ function GamePage({ auth, profile, games }) {
         addDoc(collection(database, 'games', gameId, 'moves'), {
             move: 1,
             index: 0,
-            player: SYSTEM_PLAYER,
+            player: SYSTEM_PLAYER_DISPLAY_NAME,
             tile: getTileFromSleep(sleep),
             createTimestamp: serverTimestamp()
         });
@@ -173,7 +173,10 @@ function GamePage({ auth, profile, games }) {
         <>
             <Container maxWidth='md' style={{ marginTop: 64, marginBottom: 64 }}>
                 <Typography gutterBottom variant='h4'>
-                    {gameId}
+                    {game.name}
+                </Typography>
+                <Typography gutterBottom style={{ marginBottom: 8 }}>
+                    ID do jogo: {game.id}
                 </Typography>
                 {profiles.map(profile => {
                     return (
@@ -231,8 +234,6 @@ function GamePage({ auth, profile, games }) {
                     }
                 </Card>
                 {moves.map(move => {
-                    //console.log('MOOOOOOOOOOOOOOOOOOOOOOOOVES')
-                    //console.log(moves)
                     return (
                         <ButtonGroup color='primary' variant='contained' style={{ marginRight: 16, marginBottom: 16 }}>
                             <Button>{move.tile.leftString}</Button>
