@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import { doc, addDoc, getDoc, setDoc, updateDoc, onSnapshot, arrayUnion, arrayRemove, collection, query, where, increment, serverTimestamp, Timestamp } from 'firebase/firestore';
-import { Container, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, CardContent, CardActions } from '@material-ui/core';
+import { Container, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, CardContent, CardActions, Tooltip } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
 import { arrayUpdate, objectUpdate } from '../../utils/utils/common';
@@ -229,7 +229,7 @@ function GamePage({ auth, profile, games }) {
                         </CardActions>
                     </Card>
                 }
-                <Card style={{ marginTop: 8, marginBottom: 16 }}>
+                <Card style={{ marginTop: 16, marginBottom: 16 }}>
                     <CardContent>
                         <Typography gutterBottom variant='h6'>
                             Deck
@@ -259,7 +259,7 @@ function GamePage({ auth, profile, games }) {
                         </CardActions>
                     }
                 </Card>
-                <Card style={{ marginBottom: 16 }}>
+                <Card>
                     <CardContent>
                         <Typography gutterBottom variant='h6'>
                             Tabuleiro
@@ -273,14 +273,16 @@ function GamePage({ auth, profile, games }) {
                     <CardActions style={{ overflowX: 'scroll', display: 'flex' }}>
                         {moves.map(move => {
                             return (
-                                <ButtonGroup variant='contained' color={currentMove.game.tile === move.tile ? 'secondary' : 'primary'}>
-                                    <Button onClick={() => setCurrentMove({ ...currentMove, game: { tile: move.tile } })}>
-                                        {move.tile.left.toString()}
-                                    </Button>
-                                    <Button onClick={() => setCurrentMove({ ...currentMove, game: { tile: move.tile } })}>
-                                        {move.tile.right.toString()}
-                                    </Button>
-                                </ButtonGroup>
+                                <Tooltip arrow title={profiles.filter(profile => profile.userId === move.player)[0]?.displayName || move.player}>
+                                    <ButtonGroup variant='contained' color={currentMove.game.tile === move.tile ? 'secondary' : 'primary'}>
+                                        <Button onClick={() => setCurrentMove({ ...currentMove, game: { tile: move.tile } })}>
+                                            {move.tile.left.toString()}
+                                        </Button>
+                                        <Button onClick={() => setCurrentMove({ ...currentMove, game: { tile: move.tile } })}>
+                                            {move.tile.right.toString()}
+                                        </Button>
+                                    </ButtonGroup>
+                                </Tooltip>
                             );
                         })}
                     </CardActions>
