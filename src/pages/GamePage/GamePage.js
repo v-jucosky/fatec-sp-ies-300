@@ -16,6 +16,7 @@ function GamePage({ auth, profile, games }) {
     const [moves, setMoves] = useState([]);
     const [profiles, setProfiles] = useState([]);
     const [game, setGame] = useState({ id: '', owner: '', currentPlayer: '', players: [], sleep: [], moves: 0, running: undefined, open: undefined, createTimestamp: new Timestamp() });
+    const [currentMove, setCurrentMove] = useState({ deck: { tile: undefined, number: undefined }, game: { tile: undefined } });
 
     useEffect(() => {
         getDoc(doc(database, 'games', gameId))
@@ -78,6 +79,75 @@ function GamePage({ auth, profile, games }) {
         return unsubscribeProfiles;
     }, [games]);
 
+    useEffect(() => {
+        const lastLeftMove = moves.at(0);
+        const lastRightMove = moves.at(-1);
+        const currentPlayer = game.players.indexOf(auth.currentUser.uid);
+
+        if (moves.length === 0 || !currentMove.deck.tile || !currentMove.game.tile) {
+            return;
+        };
+
+        let nextPlayer = undefined;
+        let tileIndex = undefined;
+        let tile = undefined;
+
+        if (lastLeftMove.tile === currentMove.game.tile) {
+            if (lastLeftMove.tile.left === currentMove.deck.number) {
+                tileIndex = lastLeftMove.index - 1;
+
+                if (lastLeftMove.tile.left === currentMove.deck.tile.right) {
+                    tile = currentMove.deck.tile;
+                } else {
+                    tile = flipTile(currentMove.deck.tile);
+                };
+            } else {
+                return;
+            };
+        } else if (lastRightMove.tile === currentMove.game.tile) {
+            if (lastRightMove.tile.right === currentMove.deck.number) {
+                tileIndex = lastRightMove.index + 1;
+
+                if (lastRightMove.tile.right === currentMove.deck.tile.left) {
+                    tile = currentMove.deck.tile;
+                } else {
+                    tile = flipTile(currentMove.deck.tile);
+                };
+            } else {
+                return;
+            };
+        } else {
+            return;
+        };
+
+        if (currentPlayer >= game.players.length - 1) {
+            nextPlayer = game.players[0];
+        } else {
+            nextPlayer = game.players[currentPlayer + 1];
+        };
+
+        addDoc(collection(database, 'games', gameId, 'moves'), {
+            move: game.moves + 1,
+            index: tileIndex,
+            player: auth.currentUser.uid,
+            tile: tile,
+            createTimestamp: serverTimestamp()
+        });
+
+        updateDoc(doc(database, 'games', gameId, 'decks', auth.currentUser.uid), {
+            tiles: arrayRemove(currentMove.deck.tile),
+            updateTimestamp: serverTimestamp()
+        });
+
+        updateDoc(doc(database, 'games', gameId), {
+            moves: increment(1),
+            currentPlayer: nextPlayer,
+            updateTimestamp: serverTimestamp()
+        });
+
+        setCurrentMove({ deck: { tile: undefined, number: undefined }, game: { tile: undefined } });
+    }, [currentMove]);
+
     function startGame() {
         let sleep = buildSleep(game.size);
 
@@ -106,54 +176,6 @@ function GamePage({ auth, profile, games }) {
             open: false,
             running: true,
             moves: increment(1)
-        });
-    };
-
-    function moveTile(tile) {
-        const lastLeftMove = moves.at(0);
-        const lastRightMove = moves.at(-1);
-        let currentPlayer = game.players.indexOf(auth.currentUser.uid);
-        let nextPlayer = undefined;
-        let tileIndex = undefined;
-        let _tile = undefined;
-
-        if (lastRightMove.tile.rightNumber === tile.leftNumber) {
-            tileIndex = lastRightMove.index + 1;
-        } else if (lastLeftMove.tile.leftNumber === tile.rightNumber) {
-            tileIndex = lastLeftMove.index - 1;
-        } else if (lastRightMove.tile.rightNumber === tile.rightNumber) {
-            _tile = flipTile(tile);
-            tileIndex = lastRightMove.index + 1;
-        } else if (lastLeftMove.tile.leftNumber === tile.leftNumber) {
-            _tile = flipTile(tile);
-            tileIndex = lastLeftMove.index - 1;
-        } else {
-            return;
-        };
-
-        if (currentPlayer >= game.players.length - 1) {
-            nextPlayer = game.players[0];
-        } else {
-            nextPlayer = game.players[currentPlayer + 1];
-        };
-
-        addDoc(collection(database, 'games', gameId, 'moves'), {
-            move: game.moves + 1,
-            index: tileIndex,
-            player: auth.currentUser.uid,
-            tile: tile,
-            createTimestamp: serverTimestamp()
-        });
-
-        updateDoc(doc(database, 'games', gameId, 'decks', auth.currentUser.uid), {
-            tiles: arrayRemove(_tile || tile),
-            updateTimestamp: serverTimestamp()
-        });
-
-        updateDoc(doc(database, 'games', gameId), {
-            moveCount: increment(1),
-            currentPlayer: nextPlayer,
-            updateTimestamp: serverTimestamp()
         });
     };
 
@@ -221,26 +243,48 @@ function GamePage({ auth, profile, games }) {
                         </Typography>
                     </CardContent>
                     {deck?.tiles.length > 0 &&
-                        <CardActions>
+                        <CardActions style={{ overflowX: 'scroll', display: 'flex' }}>
                             {deck?.tiles.map(tile => {
                                 return (
-                                    <ButtonGroup color='primary' disabled={game.currentPlayer !== auth.currentUser.uid} onClick={() => moveTile(tile)}>
-                                        <Button>{tile.leftString}</Button>
-                                        <Button>{tile.rightString}</Button>
+                                    <ButtonGroup color='primary' variant='contained' disabled={game.currentPlayer !== auth.currentUser.uid}>
+                                        <Button color={currentMove.deck.tile === tile && currentMove.deck.number === tile.left ? 'secondary' : 'primary'} onClick={() => setCurrentMove({ ...currentMove, deck: { tile: tile, number: tile.left } })}>
+                                            {tile.left.toString()}
+                                        </Button>
+                                        <Button color={currentMove.deck.tile === tile && currentMove.deck.number === tile.right ? 'secondary' : 'primary'} onClick={() => setCurrentMove({ ...currentMove, deck: { tile: tile, number: tile.right } })}>
+                                            {tile.right.toString()}
+                                        </Button>
                                     </ButtonGroup>
                                 );
                             })}
                         </CardActions>
                     }
                 </Card>
-                {moves.map(move => {
-                    return (
-                        <ButtonGroup color='primary' variant='contained' style={{ marginRight: 16, marginBottom: 16 }}>
-                            <Button>{move.tile.leftString}</Button>
-                            <Button>{move.tile.rightString}</Button>
-                        </ButtonGroup>
-                    );
-                })}
+                <Card style={{ marginBottom: 16 }}>
+                    <CardContent>
+                        <Typography gutterBottom variant='h6'>
+                            Tabuleiro
+                        </Typography>
+                        {game.open &&
+                            <Typography gutterBottom>
+                                As peças aparecerão aqui conforme os jogadores fizerem suas jogadas.
+                            </Typography>
+                        }
+                    </CardContent>
+                    <CardActions style={{ overflowX: 'scroll', display: 'flex' }}>
+                        {moves.map(move => {
+                            return (
+                                <ButtonGroup variant='contained' color={currentMove.game.tile === move.tile ? 'secondary' : 'primary'}>
+                                    <Button onClick={() => setCurrentMove({ ...currentMove, game: { tile: move.tile } })}>
+                                        {move.tile.left.toString()}
+                                    </Button>
+                                    <Button onClick={() => setCurrentMove({ ...currentMove, game: { tile: move.tile } })}>
+                                        {move.tile.right.toString()}
+                                    </Button>
+                                </ButtonGroup>
+                            );
+                        })}
+                    </CardActions>
+                </Card>
             </Container>
             <Fab variant='extended' color='secondary' onClick={() => getTile()} disabled={game.sleep.length === 0 || game.open} style={{ position: 'absolute', bottom: 64, right: 64 }} >
                 Dorme

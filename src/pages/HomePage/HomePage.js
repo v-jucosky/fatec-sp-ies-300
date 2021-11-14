@@ -36,13 +36,16 @@ function HomePage({ auth, profile, games }) {
                         <TableHead>
                             <TableRow>
                                 <TableCell>
-                                    ID
+                                    Nome
                                 </TableCell>
                                 <TableCell>
-                                    Data de início
+                                    Tamanho
                                 </TableCell>
                                 <TableCell>
                                     Jogadores
+                                </TableCell>
+                                <TableCell>
+                                    Data de início
                                 </TableCell>
                                 <TableCell>
                                     Ações
@@ -54,13 +57,16 @@ function HomePage({ auth, profile, games }) {
                                 return (
                                     <TableRow>
                                         <TableCell>
-                                            {game.id}
+                                            {game.name}
                                         </TableCell>
                                         <TableCell>
-                                            {game.createTimestamp?.toDate().toLocaleDateString()}
+                                            {game.size}
                                         </TableCell>
                                         <TableCell>
                                             {game.players.length}
+                                        </TableCell>
+                                        <TableCell>
+                                            {game.createTimestamp?.toDate().toLocaleDateString()}
                                         </TableCell>
                                         <TableCell>
                                             <IconButton size='small' variant='contained' color='primary' onClick={() => pageHistory.push('/jogo/' + game.id)} style={{ marginRight: 4 }}>

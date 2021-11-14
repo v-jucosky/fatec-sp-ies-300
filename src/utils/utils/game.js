@@ -3,15 +3,10 @@ function buildSleep(size) {
 
     for (let i = 0; i <= size; i++) {
         for (let j = i; j <= size; j++) {
-            let x = i.toString();
-            let y = j.toString();
-
             sleep.push({
-                id: x + '_' + y,
-                leftString: x,
-                leftNumber: i,
-                rightString: y,
-                rightNumber: j
+                id: i.toString() + '_' + j.toString(),
+                left: i,
+                right: j
             });
         };
     };
@@ -31,10 +26,8 @@ function getTileFromSleep(sleep) {
 function flipTile(tile) {
     let _tile = Object.assign({}, tile);
 
-    tile.leftString = _tile.rightString;
-    tile.leftNumber = _tile.rightNumber;
-    tile.rightString = _tile.leftString;
-    tile.rightNumber = _tile.leftNumber;
+    _tile.left = tile.right;
+    _tile.right = tile.left;
 
     return _tile;
 };
