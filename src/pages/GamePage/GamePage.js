@@ -82,13 +82,11 @@ function GamePage({ auth, profile, games }) {
     useEffect(() => {
         const lastLeftMove = moves.at(0);
         const lastRightMove = moves.at(-1);
-        const currentPlayer = game.players.indexOf(auth.currentUser.uid);
 
         if (moves.length === 0 || !currentMove.deck.tile || !currentMove.game.tile) {
             return;
         };
 
-        let nextPlayer = undefined;
         let tileIndex = undefined;
         let tile = undefined;
 
@@ -120,12 +118,6 @@ function GamePage({ auth, profile, games }) {
             return;
         };
 
-        if (currentPlayer >= game.players.length - 1) {
-            nextPlayer = game.players[0];
-        } else {
-            nextPlayer = game.players[currentPlayer + 1];
-        };
-
         addDoc(collection(database, 'games', gameId, 'moves'), {
             move: game.moves + 1,
             index: tileIndex,
@@ -139,13 +131,7 @@ function GamePage({ auth, profile, games }) {
             updateTimestamp: serverTimestamp()
         });
 
-        updateDoc(doc(database, 'games', gameId), {
-            moves: increment(1),
-            currentPlayer: nextPlayer,
-            updateTimestamp: serverTimestamp()
-        });
-
-        setCurrentMove({ deck: { tile: undefined, number: undefined }, game: { tile: undefined } });
+        passTurn();
     }, [currentMove]);
 
     function startGame() {
@@ -191,6 +177,26 @@ function GamePage({ auth, profile, games }) {
         });
     };
 
+    function passTurn() {
+        const currentPlayer = game.players.indexOf(auth.currentUser.uid);
+
+        let nextPlayer = undefined;
+
+        if (currentPlayer >= game.players.length - 1) {
+            nextPlayer = game.players[0];
+        } else {
+            nextPlayer = game.players[currentPlayer + 1];
+        };
+
+        updateDoc(doc(database, 'games', gameId), {
+            moves: increment(1),
+            currentPlayer: nextPlayer,
+            updateTimestamp: serverTimestamp()
+        });
+
+        setCurrentMove({ deck: { tile: undefined, number: undefined }, game: { tile: undefined } });
+    };
+
     return (
         <>
             <Container maxWidth='md' style={{ marginTop: 64, marginBottom: 64 }}>
@@ -198,7 +204,7 @@ function GamePage({ auth, profile, games }) {
                     {game.name}
                 </Typography>
                 <Typography gutterBottom style={{ marginBottom: 8 }}>
-                    ID do jogo: {game.id}
+                    ID do jogo: {game.id} | Criado por: {profiles.filter(profile => profile.userId === game.owner)[0]?.displayName}
                 </Typography>
                 {profiles.map(profile => {
                     return (
@@ -242,8 +248,11 @@ function GamePage({ auth, profile, games }) {
                             }
                         </Typography>
                     </CardContent>
-                    {deck?.tiles.length > 0 &&
+                    {!game.open &&
                         <CardActions style={{ overflowX: 'scroll', display: 'flex' }}>
+                            <Button color='primary' variant='contained' disabled={game.currentPlayer !== auth.currentUser.uid} onClick={() => passTurn()}>
+                                Passar a vez
+                            </Button>
                             {deck?.tiles.map(tile => {
                                 return (
                                     <ButtonGroup color='primary' variant='contained' disabled={game.currentPlayer !== auth.currentUser.uid}>
