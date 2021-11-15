@@ -4,19 +4,23 @@ import { useParams } from 'react-router-dom';
 import { doc, addDoc, getDoc, setDoc, updateDoc, onSnapshot, arrayUnion, arrayRemove, collection, query, where, increment, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { Container, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, CardContent, CardActions, Tooltip } from '@material-ui/core';
 
+import EndDialog from '../../components/EndDialog';
 import { database } from '../../utils/settings/firebase';
 import { arrayUpdate, objectUpdate } from '../../utils/utils/common';
 import { buildSleep, getTileFromSleep, flipTile } from '../../utils/utils/game';
 import { DECK_START_SIZE, MAXIMUM_NUMBER_PLAYERS, SYSTEM_PLAYER_DISPLAY_NAME } from '../../utils/settings/app';
+import Confetti from '../../assets/Confetti';
 
 function GamePage({ auth, profile, games }) {
     const pageHistory = useHistory();
     const { gameId } = useParams();
+    const { startConfetti, stopConfetti } = Confetti();
     const [deck, setDeck] = useState({ tiles: [] });
     const [moves, setMoves] = useState([]);
     const [profiles, setProfiles] = useState([]);
     const [game, setGame] = useState({ id: '', owner: '', currentPlayer: '', players: [], sleep: [], moves: 0, running: undefined, open: undefined, createTimestamp: new Timestamp() });
     const [currentMove, setCurrentMove] = useState({ deck: { tile: undefined, number: undefined }, game: { tile: undefined } });
+    const [endDialogContent, setEndDialogContent] = useState({ open: false });
 
     useEffect(() => {
         getDoc(doc(database, 'games', gameId))
@@ -74,6 +78,15 @@ function GamePage({ auth, profile, games }) {
                     arrayUpdate(snapshot, profiles, setProfiles);
                 });
             };
+
+            if (!game.running && !game.open) {
+                setEndDialogContent({ ...endDialogContent, open: true });
+
+                if (game.currentPlayer === auth.currentUser.uid) {
+                    startConfetti();
+                    setTimeout(stopConfetti, 10000);
+                };
+            };
         };
 
         return unsubscribeProfiles;
@@ -126,12 +139,25 @@ function GamePage({ auth, profile, games }) {
             createTimestamp: serverTimestamp()
         });
 
-        updateDoc(doc(database, 'games', gameId, 'decks', auth.currentUser.uid), {
-            tiles: arrayRemove(currentMove.deck.tile),
-            updateTimestamp: serverTimestamp()
-        });
+        if (deck.tiles.length === 1) {
+            updateDoc(doc(database, 'games', gameId), {
+                moves: increment(1),
+                running: false,
+                updateTimestamp: serverTimestamp()
+            });
 
-        passTurn();
+            updateDoc(doc(database, 'games', gameId, 'decks', auth.currentUser.uid), {
+                tiles: arrayRemove(currentMove.deck.tile),
+                updateTimestamp: serverTimestamp()
+            });
+        } else {
+            updateDoc(doc(database, 'games', gameId, 'decks', auth.currentUser.uid), {
+                tiles: arrayRemove(currentMove.deck.tile),
+                updateTimestamp: serverTimestamp()
+            });
+
+            passTurn();
+        };
     }, [currentMove]);
 
     function startGame() {
@@ -297,6 +323,10 @@ function GamePage({ auth, profile, games }) {
                     </CardActions>
                 </Card>
             </Container>
+            <EndDialog
+                dialogContent={endDialogContent}
+                setDialogContent={setEndDialogContent}
+            />
             <Fab variant='extended' color='secondary' onClick={() => getTile()} disabled={game.sleep.length === 0 || game.open} style={{ position: 'absolute', bottom: 64, right: 64 }} >
                 Dorme
             </Fab>
