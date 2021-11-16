@@ -15,10 +15,9 @@ function GamePage({ auth, profile, games }) {
     const pageHistory = useHistory();
     const { gameId } = useParams();
     const { startConfetti, stopConfetti } = Confetti();
-    const [deck, setDeck] = useState({ tiles: [] });
     const [moves, setMoves] = useState([]);
     const [profiles, setProfiles] = useState([]);
-    const [game, setGame] = useState({ id: '', owner: '', currentPlayer: '', players: [], sleep: [], moves: 0, running: undefined, open: undefined, createTimestamp: new Timestamp() });
+    const [game, setGame] = useState({ id: '', owner: '', currentPlayer: '', players: [], sleep: [], deck: {}, moves: 0, running: undefined, open: undefined, createTimestamp: new Timestamp() });
     const [currentMove, setCurrentMove] = useState({ deck: { tile: undefined, number: undefined }, game: { tile: undefined } });
     const [endDialogContent, setEndDialogContent] = useState({ open: false });
 
@@ -50,16 +49,11 @@ function GamePage({ auth, profile, games }) {
                 };
             });
 
-        const unsubscribeDeck = onSnapshot(doc(database, 'games', gameId, 'decks', auth.currentUser.uid), snapshot => {
-            objectUpdate(snapshot, deck, setDeck);
-        });
-
         const unsubscribeMoves = onSnapshot(query(collection(database, 'games', gameId, 'moves')), snapshot => {
             arrayUpdate(snapshot, moves, setMoves, 'index');
         });
 
         return (() => {
-            unsubscribeDeck();
             unsubscribeMoves();
         });
     }, []);
@@ -95,6 +89,7 @@ function GamePage({ auth, profile, games }) {
     useEffect(() => {
         const lastLeftMove = moves.at(0);
         const lastRightMove = moves.at(-1);
+        const currentPlayer = game.players.indexOf(auth.currentUser.uid);
 
         if (moves.length === 0 || !currentMove.deck.tile || !currentMove.game.tile) {
             return;
@@ -102,6 +97,7 @@ function GamePage({ auth, profile, games }) {
 
         let tileIndex = undefined;
         let tile = undefined;
+        let nextPlayer = undefined;
 
         if (lastLeftMove.tile === currentMove.game.tile) {
             if (lastLeftMove.tile.left === currentMove.deck.number) {
@@ -139,29 +135,34 @@ function GamePage({ auth, profile, games }) {
             createTimestamp: serverTimestamp()
         });
 
-        if (deck.tiles.length === 1) {
+        if (game.deck[auth.currentUser.uid].length === 1) {
             updateDoc(doc(database, 'games', gameId), {
+                [`deck.${auth.currentUser.uid}`]: arrayRemove(currentMove.deck.tile),
                 moves: increment(1),
                 running: false,
                 updateTimestamp: serverTimestamp()
             });
-
-            updateDoc(doc(database, 'games', gameId, 'decks', auth.currentUser.uid), {
-                tiles: arrayRemove(currentMove.deck.tile),
-                updateTimestamp: serverTimestamp()
-            });
         } else {
-            updateDoc(doc(database, 'games', gameId, 'decks', auth.currentUser.uid), {
-                tiles: arrayRemove(currentMove.deck.tile),
+            if (currentPlayer >= game.players.length - 1) {
+                nextPlayer = game.players[0];
+            } else {
+                nextPlayer = game.players[currentPlayer + 1];
+            };
+
+            updateDoc(doc(database, 'games', gameId), {
+                currentPlayer: nextPlayer,
+                [`deck.${auth.currentUser.uid}`]: arrayRemove(currentMove.deck.tile),
+                moves: increment(1),
                 updateTimestamp: serverTimestamp()
             });
-
-            passTurn();
         };
+
+        setCurrentMove({ deck: { tile: undefined, number: undefined }, game: { tile: undefined } });
     }, [currentMove]);
 
     function startGame() {
         let sleep = buildSleep(game.size);
+        let deck = {};
 
         game.players.forEach(player => {
             let tiles = [];
@@ -170,9 +171,7 @@ function GamePage({ auth, profile, games }) {
                 tiles.push(getTileFromSleep(sleep));
             };
 
-            setDoc(doc(database, 'games', gameId, 'decks', player), {
-                tiles: tiles
-            });
+            deck[player] = tiles;
         });
 
         addDoc(collection(database, 'games', gameId, 'moves'), {
@@ -185,21 +184,19 @@ function GamePage({ auth, profile, games }) {
 
         updateDoc(doc(database, 'games', gameId), {
             sleep: sleep,
+            deck: deck,
+            moves: increment(1),
             open: false,
-            running: true,
-            moves: increment(1)
+            running: true
         });
     };
 
     function getTile() {
         let tile = Math.floor(Math.random() * game.sleep.length);
 
-        updateDoc(doc(database, 'games', gameId, 'decks', auth.currentUser.uid), {
-            tiles: arrayUnion(game.sleep[tile])
-        });
-
         updateDoc(doc(database, 'games', gameId), {
-            sleep: arrayRemove(game.sleep[tile])
+            sleep: arrayRemove(game.sleep[tile]),
+            [`deck.${auth.currentUser.uid}`]: arrayUnion(game.sleep[tile])
         });
     };
 
@@ -279,7 +276,7 @@ function GamePage({ auth, profile, games }) {
                             <Button color='primary' variant='contained' disabled={game.currentPlayer !== auth.currentUser.uid} onClick={() => passTurn()}>
                                 Passar a vez
                             </Button>
-                            {deck?.tiles.map(tile => {
+                            {game.deck[auth.currentUser.uid]?.map(tile => {
                                 return (
                                     <ButtonGroup color='primary' variant='contained' disabled={game.currentPlayer !== auth.currentUser.uid}>
                                         <Button color={currentMove.deck.tile === tile && currentMove.deck.number === tile.left ? 'secondary' : 'primary'} onClick={() => setCurrentMove({ ...currentMove, deck: { tile: tile, number: tile.left } })}>

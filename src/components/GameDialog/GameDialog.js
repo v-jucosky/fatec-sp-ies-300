@@ -21,6 +21,7 @@ function GameDialog({ dialogContent, setDialogContent, auth }) {
                 auth.currentUser.uid
             ],
             sleep: [],
+            deck: {},
             moves: 0,
             size: parseInt(dialogContent.size),
             running: false,
