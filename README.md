@@ -10,7 +10,7 @@ Construir um jogo de dominó online multijogador, que deverá possuir:
 - [x] Perfis de usuários (apelido, preferências, etc.)
 - [x] Capacidade de personalização através de um “super usuário”
 - [x] Recursos monetizáveis
-- [ ] Funcionalidade básica do jogo
+- [x] Funcionalidade básica do jogo
 - [ ] (Extra) Chat entre jogadores de uma mesma partida
 
 ## Arquitetura
@@ -23,7 +23,7 @@ As bibliotecas disponíveis permitem que esses recursos sejam consumidos diretam
 
 A escolha pelo Firebase foi feita levando-se em conta os requisitos relativamente simples do projeto e os limites recomendados da plataforma: em uma partida de dominó, poucos jogadores estão envolvidos e o tabuleiro, bem como as regras do jogo, são simples. Assim, optou-se pela criação dos seguintes listeners globais:
 
-* Jogos que o usuário particia
+* Jogos que o usuário participa
 * Compras realizadas pelo usuário
 * Temas disponíveis na loja
 * Perfil do usuário
@@ -31,8 +31,6 @@ A escolha pelo Firebase foi feita levando-se em conta os requisitos relativament
 
 Ao entrar em um jogo, são criados os seguintes listeners locais:
 
-* Jogadas
-* Peças do jogador
 * Perfis dos jogadores na partida
 
 A criação de vários listeners, embora deva ser usada com cuidado, é uma prática incentivada na arquitetura Firebase. Os principais limites do Cloud Firestore são:
