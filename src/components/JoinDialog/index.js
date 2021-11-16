@@ -1,3 +1,4 @@
-import JoinDialog from './JoinDialog';
+import JoinDialog, { joinDialogDefaultContent } from './JoinDialog';
 
 export default JoinDialog;
+export { joinDialogDefaultContent };

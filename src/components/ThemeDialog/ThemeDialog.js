@@ -4,9 +4,18 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextFiel
 
 import { database } from '../../utils/settings/firebase';
 
+const themeDialogDefaultContent = {
+    name: '',
+    description: '',
+    price: 0,
+    code: '',
+    id: undefined,
+    open: false
+};
+
 function ThemeDialog({ dialogContent, setDialogContent }) {
     function closeDialog() {
-        setDialogContent({ ...dialogContent, open: false });
+        setDialogContent(themeDialogDefaultContent);
     };
 
     function createTheme() {
@@ -56,7 +65,7 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
                     id='name'
                     label='Nome'
                     variant='outlined'
-                    disabled={'id' in dialogContent}
+                    disabled={dialogContent.id}
                     value={dialogContent.name}
                     onChange={(event) => setDialogContent({ ...dialogContent, name: event.target.value })}
                     style={{ marginBottom: 16 }}
@@ -67,7 +76,7 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
                     id='code'
                     label='Código'
                     variant='outlined'
-                    disabled={'id' in dialogContent}
+                    disabled={dialogContent.id}
                     value={dialogContent.code}
                     onChange={(event) => setDialogContent({ ...dialogContent, code: event.target.value })}
                     InputProps={{ startAdornment: <InputAdornment position='start'>#</InputAdornment> }}
@@ -100,7 +109,7 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
                 <Button color='primary' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
-                <Button color='primary' disabled={!(dialogContent.code.length === 6 && dialogContent.name.length > 0 && dialogContent.price)} onClick={() => 'id' in dialogContent ? updateTheme() : createTheme()}>
+                <Button color='primary' disabled={!(dialogContent.code.length === 6 && dialogContent.name.length > 0 && dialogContent.price)} onClick={() => dialogContent.id ? updateTheme() : createTheme()}>
                     Salvar
                 </Button>
             </DialogActions>
@@ -109,3 +118,4 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
 };
 
 export default ThemeDialog;
+export { themeDialogDefaultContent };

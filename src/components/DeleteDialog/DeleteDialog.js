@@ -1,9 +1,15 @@
 import React from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from '@material-ui/core';
 
+const deleteDialogDefaultContent = {
+    name: '',
+    onDelete: () => { return; },
+    open: false
+};
+
 function DeleteDialog({ dialogContent, setDialogContent }) {
     function closeDialog() {
-        setDialogContent({ ...dialogContent, open: false });
+        setDialogContent(deleteDialogDefaultContent);
     };
 
     function deleteItem() {
@@ -34,3 +40,4 @@ function DeleteDialog({ dialogContent, setDialogContent }) {
 };
 
 export default DeleteDialog;
+export { deleteDialogDefaultContent };

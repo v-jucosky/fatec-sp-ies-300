@@ -5,11 +5,17 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextFiel
 
 import { database } from '../../utils/settings/firebase';
 
+const gameDialogDefaultContent = {
+    name: '',
+    size: '6',
+    open: false
+};
+
 function GameDialog({ dialogContent, setDialogContent, auth }) {
     const pageHistory = useHistory();
 
     function closeDialog() {
-        setDialogContent({ ...dialogContent, open: false });
+        setDialogContent(gameDialogDefaultContent);
     };
 
     function createGame() {
@@ -100,3 +106,4 @@ function GameDialog({ dialogContent, setDialogContent, auth }) {
 };
 
 export default GameDialog;
+export { gameDialogDefaultContent };

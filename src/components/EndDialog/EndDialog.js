@@ -2,11 +2,15 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from '@material-ui/core';
 
+const endDialogDefaultContent = {
+    open: false
+}
+
 function EndDialog({ dialogContent, setDialogContent }) {
     const pageHistory = useHistory();
 
     function closeDialog() {
-        setDialogContent({ ...dialogContent, open: false });
+        setDialogContent(endDialogDefaultContent);
     };
 
     return (
@@ -32,3 +36,4 @@ function EndDialog({ dialogContent, setDialogContent }) {
 };
 
 export default EndDialog;
+export { endDialogDefaultContent };

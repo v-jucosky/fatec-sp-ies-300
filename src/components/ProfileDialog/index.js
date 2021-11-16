@@ -1,3 +1,4 @@
-import ProfileDialog from './ProfileDialog';
+import ProfileDialog, { profileDialogDefaultContent } from './ProfileDialog';
 
 export default ProfileDialog;
+export { profileDialogDefaultContent };

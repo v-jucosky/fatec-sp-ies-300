@@ -2,11 +2,16 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, Button } from '@material-ui/core';
 
+const joinDialogDefaultContent = {
+    id: '',
+    open: false
+};
+
 function JoinDialog({ dialogContent, setDialogContent }) {
     const pageHistory = useHistory();
 
     function closeDialog() {
-        setDialogContent({ ...dialogContent, open: false });
+        setDialogContent(joinDialogDefaultContent);
     };
 
     return (
@@ -42,3 +47,4 @@ function JoinDialog({ dialogContent, setDialogContent }) {
 };
 
 export default JoinDialog;
+export { joinDialogDefaultContent };

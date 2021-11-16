@@ -1,14 +1,22 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { updateDoc, doc, serverTimestamp } from '@firebase/firestore';
+import { updateDoc, doc, serverTimestamp, Timestamp } from '@firebase/firestore';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, MenuItem, Button, Link as MaterialLink } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
-import { DEFAULT_ACCENT_COLOR, THEME } from '../../utils/settings/app';
+import { DEFAULT_ACCENT_COLOR } from '../../utils/settings/app';
+import { THEME } from '../../utils/utils/types';
+
+const profileDialogDefaultContent = {
+    displayName: '',
+    accentColor: DEFAULT_ACCENT_COLOR,
+    createTimestamp: new Timestamp(),
+    open: false
+};
 
 function ProfileDialog({ dialogContent, setDialogContent, auth, purchases }) {
     function closeDialog() {
-        setDialogContent({ ...dialogContent, open: false });
+        setDialogContent(profileDialogDefaultContent);
     };
 
     function updateProfile() {
@@ -87,3 +95,4 @@ function ProfileDialog({ dialogContent, setDialogContent, auth, purchases }) {
 };
 
 export default ProfileDialog;
+export { profileDialogDefaultContent };

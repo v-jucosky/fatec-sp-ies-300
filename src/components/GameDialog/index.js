@@ -1,3 +1,4 @@
-import GameDialog from './GameDialog';
+import GameDialog, { gameDialogDefaultContent } from './GameDialog';
 
 export default GameDialog;
+export { gameDialogDefaultContent };

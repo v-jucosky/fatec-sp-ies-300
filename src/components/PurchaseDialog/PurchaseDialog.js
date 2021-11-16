@@ -4,9 +4,18 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button }
 
 import { database } from '../../utils/settings/firebase';
 
+const purchaseDialogDefaultContent = {
+    type: undefined,
+    item: {
+        name: '',
+        price: 0
+    },
+    open: false
+};
+
 function PurchaseDialog({ dialogContent, setDialogContent, auth, profile }) {
     function closeDialog() {
-        setDialogContent({ ...dialogContent, open: false });
+        setDialogContent(purchaseDialogDefaultContent);
     };
 
     function purchaseItem() {
@@ -42,3 +51,4 @@ function PurchaseDialog({ dialogContent, setDialogContent, auth, profile }) {
 };
 
 export default PurchaseDialog;
+export { purchaseDialogDefaultContent };
