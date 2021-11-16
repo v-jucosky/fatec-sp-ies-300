@@ -3,8 +3,8 @@ import { useHistory } from 'react-router-dom';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, Button } from '@material-ui/core';
 
 const joinDialogDefaultContent = {
-    id: '',
-    open: false
+    gameId: '',
+    isOpen: false
 };
 
 function JoinDialog({ dialogContent, setDialogContent }) {
@@ -15,7 +15,7 @@ function JoinDialog({ dialogContent, setDialogContent }) {
     };
 
     return (
-        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.isOpen} onClose={() => closeDialog()}>
             <DialogTitle>
                 Entrar em um jogo
             </DialogTitle>
@@ -27,18 +27,18 @@ function JoinDialog({ dialogContent, setDialogContent }) {
                     required
                     fullWidth
                     autoFocus
-                    id='id'
-                    label='ID'
+                    id='gameId'
+                    label='ID do jogo'
                     variant='outlined'
                     value={dialogContent.gameId}
-                    onChange={(event) => setDialogContent({ ...dialogContent, id: event.target.value })}
+                    onChange={(event) => setDialogContent({ ...dialogContent, gameId: event.target.value })}
                 />
             </DialogContent>
             <DialogActions>
                 <Button color='primary' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
-                <Button color='primary' disabled={dialogContent.id.length !== 20} onClick={() => pageHistory.push('/jogo/' + dialogContent.id)}>
+                <Button color='primary' disabled={dialogContent.gameId.length !== 20} onClick={() => pageHistory.push('/jogo/' + dialogContent.gameId)}>
                     Entrar
                 </Button>
             </DialogActions>

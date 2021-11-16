@@ -1,25 +1,34 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
-import { doc, addDoc, getDoc, setDoc, updateDoc, onSnapshot, arrayUnion, arrayRemove, collection, query, where, increment, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, onSnapshot, arrayUnion, arrayRemove, collection, query, where, increment, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { Container, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, CardContent, CardActions, Tooltip } from '@material-ui/core';
 
-import EndDialog from '../../components/EndDialog';
+import EndDialog, { endDialogDefaultContent } from '../../components/EndDialog';
+import Confetti from '../../assets/Confetti';
 import { database } from '../../utils/settings/firebase';
-import { arrayUpdate, objectUpdate } from '../../utils/utils/common';
+import { arrayUpdate } from '../../utils/utils/common';
 import { buildSleep, getTileFromSleep, flipTile } from '../../utils/utils/game';
 import { DECK_START_SIZE, MAXIMUM_NUMBER_PLAYERS, SYSTEM_PLAYER_DISPLAY_NAME } from '../../utils/settings/app';
-import Confetti from '../../assets/Confetti';
+
+const currentMoveDefaultValue = {
+    deckSelection: {
+        tile: undefined,
+        number: undefined
+    },
+    gameSelection: {
+        tile: undefined
+    }
+};
 
 function GamePage({ auth, profile, games }) {
     const pageHistory = useHistory();
     const { gameId } = useParams();
     const { startConfetti, stopConfetti } = Confetti();
-    const [moves, setMoves] = useState([]);
     const [profiles, setProfiles] = useState([]);
-    const [game, setGame] = useState({ id: '', owner: '', currentPlayer: '', players: [], sleep: [], deck: {}, moves: 0, running: undefined, open: undefined, createTimestamp: new Timestamp() });
-    const [currentMove, setCurrentMove] = useState({ deck: { tile: undefined, number: undefined }, game: { tile: undefined } });
-    const [endDialogContent, setEndDialogContent] = useState({ open: false });
+    const [game, setGame] = useState({ name: '', userId: '', currentUserId: '', participantUserIds: [], sleepTiles: [], moves: [], deckContent: {}, moveCount: 0, tileSize: 6, isRunning: false, isOpen: true, createTimestamp: new Timestamp(), updateTimestamp: new Timestamp() });
+    const [currentMove, setCurrentMove] = useState(currentMoveDefaultValue);
+    const [endDialogContent, setEndDialogContent] = useState(endDialogDefaultContent);
 
     useEffect(() => {
         getDoc(doc(database, 'games', gameId))
@@ -27,18 +36,18 @@ function GamePage({ auth, profile, games }) {
                 let game = document.data();
 
                 try {
-                    if (!game.players.includes(auth.currentUser.uid)) {
-                        if (!game.open) {
+                    if (!game.participantUserIds.includes(auth.currentUser.uid)) {
+                        if (!game.isOpen) {
                             alert('Este jogo não está aberto.');
                             pageHistory.push('/');
                             return;
-                        } else if (game.players.length >= MAXIMUM_NUMBER_PLAYERS) {
+                        } else if (game.participantUserIds.length >= MAXIMUM_NUMBER_PLAYERS) {
                             alert('Número máximo de jogadores atingido.');
                             pageHistory.push('/');
                             return;
                         } else {
                             updateDoc(doc(database, 'games', gameId), {
-                                players: arrayUnion(auth.currentUser.uid)
+                                participantUserIds: arrayUnion(auth.currentUser.uid)
                             });
                         };
                     };
@@ -48,176 +57,171 @@ function GamePage({ auth, profile, games }) {
                     return;
                 };
             });
-
-        const unsubscribeMoves = onSnapshot(query(collection(database, 'games', gameId, 'moves')), snapshot => {
-            arrayUpdate(snapshot, moves, setMoves, 'index');
-        });
-
-        return (() => {
-            unsubscribeMoves();
-        });
     }, []);
 
     useEffect(() => {
-        let unsubscribeProfiles = () => { return };
         let game = games.filter(game => game.id === gameId)[0];
 
         if (game) {
             setGame(game);
 
-            if (game.players.length !== profiles.length) {
-                setProfiles([]);
+            if (!game.isRunning && !game.isOpen) {
+                setEndDialogContent({ ...endDialogContent, isOpen: true });
 
-                unsubscribeProfiles = onSnapshot(query(collection(database, 'profiles'), where('userId', 'in', game.players)), snapshot => {
-                    arrayUpdate(snapshot, profiles, setProfiles);
-                });
-            };
-
-            if (!game.running && !game.open) {
-                setEndDialogContent({ ...endDialogContent, open: true });
-
-                if (game.currentPlayer === auth.currentUser.uid) {
+                if (game.currentUserId === auth.currentUser.uid) {
                     startConfetti();
                     setTimeout(stopConfetti, 10000);
                 };
             };
-        };
 
-        return unsubscribeProfiles;
+            if (game.participantUserIds.length !== profiles.length) {
+                setProfiles([]);
+
+                const unsubscribeProfiles = onSnapshot(query(collection(database, 'profiles'), where('userId', 'in', game.participantUserIds)), snapshot => {
+                    arrayUpdate(snapshot, profiles, setProfiles);
+                });
+
+                return unsubscribeProfiles;
+            };
+        };
     }, [games]);
 
     useEffect(() => {
-        const lastLeftMove = moves.at(0);
-        const lastRightMove = moves.at(-1);
-        const currentPlayer = game.players.indexOf(auth.currentUser.uid);
-
-        if (moves.length === 0 || !currentMove.deck.tile || !currentMove.game.tile) {
-            return;
-        };
-
-        let tileIndex = undefined;
-        let tile = undefined;
-        let nextPlayer = undefined;
-
-        if (lastLeftMove.tile === currentMove.game.tile) {
-            if (lastLeftMove.tile.left === currentMove.deck.number) {
-                tileIndex = lastLeftMove.index - 1;
-
-                if (lastLeftMove.tile.left === currentMove.deck.tile.right) {
-                    tile = currentMove.deck.tile;
-                } else {
-                    tile = flipTile(currentMove.deck.tile);
-                };
-            } else {
-                return;
-            };
-        } else if (lastRightMove.tile === currentMove.game.tile) {
-            if (lastRightMove.tile.right === currentMove.deck.number) {
-                tileIndex = lastRightMove.index + 1;
-
-                if (lastRightMove.tile.right === currentMove.deck.tile.left) {
-                    tile = currentMove.deck.tile;
-                } else {
-                    tile = flipTile(currentMove.deck.tile);
-                };
-            } else {
-                return;
-            };
-        } else {
-            return;
-        };
-
-        addDoc(collection(database, 'games', gameId, 'moves'), {
-            move: game.moves + 1,
-            index: tileIndex,
-            player: auth.currentUser.uid,
-            tile: tile,
-            createTimestamp: serverTimestamp()
+        const moves = game.moves.sort((a, b) => {
+            return a.index - b.index;
         });
 
-        if (game.deck[auth.currentUser.uid].length === 1) {
+        const lastLeftMove = moves.at(0);
+        const lastRightMove = moves.at(-1);
+        const currentUserIdIndex = game.participantUserIds.indexOf(auth.currentUser.uid);
+
+        if (moves.length === 0 || !currentMove.deckSelection.tile || !currentMove.gameSelection.tile) {
+            return;
+        };
+
+        let index = undefined;
+        let tile = undefined;
+        let nextUserId = undefined;
+
+        if (lastLeftMove.tile === currentMove.gameSelection.tile) {
+            if (lastLeftMove.tile.left === currentMove.deckSelection.number) {
+                index = lastLeftMove.index - 1;
+
+                if (lastLeftMove.tile.left === currentMove.deckSelection.tile.right) {
+                    tile = currentMove.deckSelection.tile;
+                } else {
+                    tile = flipTile(currentMove.deckSelection.tile);
+                };
+            } else {
+                return;
+            };
+        } else if (lastRightMove.tile === currentMove.gameSelection.tile) {
+            if (lastRightMove.tile.right === currentMove.deckSelection.number) {
+                index = lastRightMove.index + 1;
+
+                if (lastRightMove.tile.right === currentMove.deckSelection.tile.left) {
+                    tile = currentMove.deckSelection.tile;
+                } else {
+                    tile = flipTile(currentMove.deckSelection.tile);
+                };
+            } else {
+                return;
+            };
+        } else {
+            return;
+        };
+
+        if (game.deckContent[auth.currentUser.uid].length === 1) {
             updateDoc(doc(database, 'games', gameId), {
-                [`deck.${auth.currentUser.uid}`]: arrayRemove(currentMove.deck.tile),
-                moves: increment(1),
-                running: false,
+                moves: arrayUnion({
+                    index: index,
+                    userId: auth.currentUser.uid,
+                    tile: tile
+                }),
+                [`deckContent.${auth.currentUser.uid}`]: arrayRemove(currentMove.deckSelection.tile),
+                moveCount: increment(1),
+                isRunning: false,
                 updateTimestamp: serverTimestamp()
             });
         } else {
-            if (currentPlayer >= game.players.length - 1) {
-                nextPlayer = game.players[0];
+            if (currentUserIdIndex >= game.participantUserIds.length - 1) {
+                nextUserId = game.participantUserIds[0];
             } else {
-                nextPlayer = game.players[currentPlayer + 1];
+                nextUserId = game.participantUserIds[currentUserIdIndex + 1];
             };
 
             updateDoc(doc(database, 'games', gameId), {
-                currentPlayer: nextPlayer,
-                [`deck.${auth.currentUser.uid}`]: arrayRemove(currentMove.deck.tile),
-                moves: increment(1),
+                currentUserId: nextUserId,
+                moves: arrayUnion({
+                    index: index,
+                    userId: auth.currentUser.uid,
+                    tile: tile
+                }),
+                [`deckContent.${auth.currentUser.uid}`]: arrayRemove(currentMove.deckSelection.tile),
+                moveCount: increment(1),
                 updateTimestamp: serverTimestamp()
             });
         };
 
-        setCurrentMove({ deck: { tile: undefined, number: undefined }, game: { tile: undefined } });
+        setCurrentMove(currentMoveDefaultValue);
     }, [currentMove]);
 
     function startGame() {
-        let sleep = buildSleep(game.size);
-        let deck = {};
+        let sleepTiles = buildSleep(game.tileSize);
+        let deckContent = {};
 
-        game.players.forEach(player => {
+        game.participantUserIds.forEach(userId => {
             let tiles = [];
 
             for (let i = 0; i < DECK_START_SIZE; i++) {
-                tiles.push(getTileFromSleep(sleep));
+                tiles.push(getTileFromSleep(sleepTiles));
             };
 
-            deck[player] = tiles;
-        });
-
-        addDoc(collection(database, 'games', gameId, 'moves'), {
-            move: 1,
-            index: 0,
-            player: SYSTEM_PLAYER_DISPLAY_NAME,
-            tile: getTileFromSleep(sleep),
-            createTimestamp: serverTimestamp()
+            deckContent[userId] = tiles;
         });
 
         updateDoc(doc(database, 'games', gameId), {
-            sleep: sleep,
-            deck: deck,
-            moves: increment(1),
-            open: false,
-            running: true
+            sleepTiles: sleepTiles,
+            moves: arrayUnion({
+                index: 0,
+                tile: getTileFromSleep(sleepTiles)
+            }),
+            deckContent: deckContent,
+            moveCount: increment(1),
+            isRunning: true,
+            isOpen: false,
+            updateTimestamp: serverTimestamp()
         });
     };
 
     function getTile() {
-        let tile = Math.floor(Math.random() * game.sleep.length);
+        let tile = Math.floor(Math.random() * game.sleepTiles.length);
 
         updateDoc(doc(database, 'games', gameId), {
-            sleep: arrayRemove(game.sleep[tile]),
-            [`deck.${auth.currentUser.uid}`]: arrayUnion(game.sleep[tile])
+            sleepTiles: arrayRemove(game.sleepTiles[tile]),
+            [`deckContent.${auth.currentUser.uid}`]: arrayUnion(game.sleepTiles[tile]),
+            updateTimestamp: serverTimestamp()
         });
     };
 
     function passTurn() {
-        const currentPlayer = game.players.indexOf(auth.currentUser.uid);
+        const currentUserId = game.participantUserIds.indexOf(auth.currentUser.uid);
 
-        let nextPlayer = undefined;
+        let nextUserId = undefined;
 
-        if (currentPlayer >= game.players.length - 1) {
-            nextPlayer = game.players[0];
+        if (currentUserId >= game.participantUserIds.length - 1) {
+            nextUserId = game.participantUserIds[0];
         } else {
-            nextPlayer = game.players[currentPlayer + 1];
+            nextUserId = game.participantUserIds[currentUserId + 1];
         };
 
         updateDoc(doc(database, 'games', gameId), {
-            moves: increment(1),
-            currentPlayer: nextPlayer,
+            moveCount: increment(1),
+            currentUserId: nextUserId,
             updateTimestamp: serverTimestamp()
         });
 
-        setCurrentMove({ deck: { tile: undefined, number: undefined }, game: { tile: undefined } });
+        setCurrentMove(currentMoveDefaultValue);
     };
 
     return (
@@ -227,7 +231,7 @@ function GamePage({ auth, profile, games }) {
                     {game.name}
                 </Typography>
                 <Typography gutterBottom style={{ marginBottom: 8 }}>
-                    ID do jogo: {game.id} | Criado por: {profiles.filter(profile => profile.userId === game.owner)[0]?.displayName}
+                    ID do jogo: {game.id} | Criado por: {profiles.filter(profile => profile.userId === game.userId)[0]?.displayName}
                 </Typography>
                 {profiles.map(profile => {
                     return (
@@ -238,7 +242,7 @@ function GamePage({ auth, profile, games }) {
                         />
                     );
                 })}
-                {game.owner === auth.currentUser.uid &&
+                {game.userId === auth.currentUser.uid &&
                     <Card style={{ marginTop: 8, marginBottom: 8 }}>
                         <CardContent>
                             <Typography gutterBottom variant='h6'>
@@ -252,7 +256,7 @@ function GamePage({ auth, profile, games }) {
                             <Button color='primary' onClick={() => navigator.clipboard.writeText(gameId)}>
                                 Copiar ID
                             </Button>
-                            <Button color='primary' onClick={() => startGame()} disabled={!game.open}>
+                            <Button color='primary' onClick={() => startGame()} disabled={!game.isOpen}>
                                 Iniciar
                             </Button>
                         </CardActions>
@@ -264,25 +268,25 @@ function GamePage({ auth, profile, games }) {
                             Deck
                         </Typography>
                         <Typography gutterBottom>
-                            {game.open ?
+                            {game.isOpen ?
                                 'Você receberá suas peças aqui quando o administrador do jogo iniciar a partida.'
                                 :
                                 'As peças ficarão disponíveis quando for a sua vez de jogar.'
                             }
                         </Typography>
                     </CardContent>
-                    {!game.open &&
+                    {!game.isOpen &&
                         <CardActions style={{ overflowX: 'scroll', display: 'flex' }}>
-                            <Button color='primary' variant='contained' disabled={game.currentPlayer !== auth.currentUser.uid} onClick={() => passTurn()}>
+                            <Button color='primary' variant='contained' disabled={game.currentUserId !== auth.currentUser.uid} onClick={() => passTurn()}>
                                 Passar a vez
                             </Button>
-                            {game.deck[auth.currentUser.uid]?.map(tile => {
+                            {game.deckContent[auth.currentUser.uid]?.map(tile => {
                                 return (
-                                    <ButtonGroup color='primary' variant='contained' disabled={game.currentPlayer !== auth.currentUser.uid}>
-                                        <Button color={currentMove.deck.tile === tile && currentMove.deck.number === tile.left ? 'secondary' : 'primary'} onClick={() => setCurrentMove({ ...currentMove, deck: { tile: tile, number: tile.left } })}>
+                                    <ButtonGroup color='primary' variant='contained' disabled={game.currentUserId !== auth.currentUser.uid}>
+                                        <Button color={currentMove.deckSelection.tile === tile && currentMove.deckSelection.number === tile.left ? 'secondary' : 'primary'} onClick={() => setCurrentMove({ ...currentMove, deckSelection: { tile: tile, number: tile.left } })}>
                                             {tile.left.toString()}
                                         </Button>
-                                        <Button color={currentMove.deck.tile === tile && currentMove.deck.number === tile.right ? 'secondary' : 'primary'} onClick={() => setCurrentMove({ ...currentMove, deck: { tile: tile, number: tile.right } })}>
+                                        <Button color={currentMove.deckSelection.tile === tile && currentMove.deckSelection.number === tile.right ? 'secondary' : 'primary'} onClick={() => setCurrentMove({ ...currentMove, deckSelection: { tile: tile, number: tile.right } })}>
                                             {tile.right.toString()}
                                         </Button>
                                     </ButtonGroup>
@@ -296,21 +300,23 @@ function GamePage({ auth, profile, games }) {
                         <Typography gutterBottom variant='h6'>
                             Tabuleiro
                         </Typography>
-                        {game.open &&
+                        {game.isOpen &&
                             <Typography gutterBottom>
                                 As peças aparecerão aqui conforme os jogadores fizerem suas jogadas.
                             </Typography>
                         }
                     </CardContent>
                     <CardActions style={{ overflowX: 'scroll', display: 'flex' }}>
-                        {moves.map(move => {
+                        {game.moves.sort((a, b) => {
+                            return a.index - b.index;
+                        }).map(move => {
                             return (
-                                <Tooltip arrow title={profiles.filter(profile => profile.userId === move.player)[0]?.displayName || move.player}>
-                                    <ButtonGroup variant='contained' color={currentMove.game.tile === move.tile ? 'secondary' : 'primary'}>
-                                        <Button onClick={() => setCurrentMove({ ...currentMove, game: { tile: move.tile } })}>
+                                <Tooltip arrow title={profiles.filter(profile => profile.userId === move.userId)[0]?.displayName || SYSTEM_PLAYER_DISPLAY_NAME}>
+                                    <ButtonGroup variant='contained' color={currentMove.gameSelection.tile === move.tile ? 'secondary' : 'primary'}>
+                                        <Button onClick={() => setCurrentMove({ ...currentMove, gameSelection: { tile: move.tile } })}>
                                             {move.tile.left.toString()}
                                         </Button>
-                                        <Button onClick={() => setCurrentMove({ ...currentMove, game: { tile: move.tile } })}>
+                                        <Button onClick={() => setCurrentMove({ ...currentMove, gameSelection: { tile: move.tile } })}>
                                             {move.tile.right.toString()}
                                         </Button>
                                     </ButtonGroup>
@@ -324,7 +330,7 @@ function GamePage({ auth, profile, games }) {
                 dialogContent={endDialogContent}
                 setDialogContent={setEndDialogContent}
             />
-            <Fab variant='extended' color='secondary' onClick={() => getTile()} disabled={game.sleep.length === 0 || game.open} style={{ position: 'absolute', bottom: 64, right: 64 }} >
+            <Fab variant='extended' color='secondary' onClick={() => getTile()} disabled={game.sleepTiles.length === 0 || game.isOpen} style={{ position: 'absolute', bottom: 64, right: 64 }} >
                 Dorme
             </Fab>
         </>

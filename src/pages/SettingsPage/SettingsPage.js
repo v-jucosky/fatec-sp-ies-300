@@ -3,14 +3,14 @@ import { doc, deleteDoc } from 'firebase/firestore';
 import { Container, Typography, IconButton, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper, Box, Tabs, Tab } from '@material-ui/core';
 import { Delete, Edit } from '@material-ui/icons';
 
-import ThemeDialog from '../../components/ThemeDialog';
-import DeleteDialog from '../../components/DeleteDialog';
+import ThemeDialog, { themeDialogDefaultContent } from '../../components/ThemeDialog';
+import DeleteDialog, { deleteDialogDefaultContent } from '../../components/DeleteDialog';
 import { database } from '../../utils/settings/firebase';
 
 function SettingsPage({ themes }) {
-    const [tabState, setTabState] = useState({ index: 0 });
-    const [themeDialogContent, setThemeDialogContent] = useState({ name: '', code: '', description: '', price: null, open: false });
-    const [deleteDialogContent, setDeleteDialogContent] = useState({ name: '', onDelete: undefined, open: false });
+    const [tabIndex, setTabIndex] = useState(0);
+    const [themeDialogContent, setThemeDialogContent] = useState(themeDialogDefaultContent);
+    const [deleteDialogContent, setDeleteDialogContent] = useState(deleteDialogDefaultContent);
 
     function deleteTheme(id) {
         deleteDoc(doc(database, 'themes', id));
@@ -23,13 +23,13 @@ function SettingsPage({ themes }) {
                     Configurações
                 </Typography>
                 <Box>
-                    <Tabs value={tabState.index} onChange={(event, value) => setTabState({ ...tabState, index: value })}>
+                    <Tabs value={tabIndex} onChange={(event, value) => setTabIndex(value)} style={{ marginBottom: 16 }}>
                         <Tab label='Temas' />
                         <Tab label='Sobre' />
                     </Tabs>
-                    {tabState.index === 0 &&
+                    {tabIndex === 0 &&
                         <>
-                            <TableContainer component={Paper} style={{ marginTop: 24 }}>
+                            <TableContainer component={Paper} style={{ marginBottom: 16 }}>
                                 <Typography gutterBottom variant='h6' style={{ margin: 16 }}>
                                     Temas
                                 </Typography>
@@ -61,16 +61,16 @@ function SettingsPage({ themes }) {
                                                         {theme.name}
                                                     </TableCell>
                                                     <TableCell>
-                                                        {theme.code}
+                                                        {theme.colorCode}
                                                     </TableCell>
                                                     <TableCell>
                                                         R${theme.price.toFixed(2)}
                                                     </TableCell>
                                                     <TableCell>
-                                                        <IconButton size='small' variant='contained' color='primary' onClick={() => setThemeDialogContent({ ...theme, code: theme.code.substring(1), open: true })} style={{ marginRight: 4 }}>
+                                                        <IconButton size='small' variant='contained' color='primary' onClick={() => setThemeDialogContent({ ...themeDialogContent, ...theme, themeId: theme.id, colorCode: theme.colorCode.substring(1), isOpen: true })} style={{ marginRight: 4 }}>
                                                             <Edit />
                                                         </IconButton>
-                                                        <IconButton size='small' variant='contained' color='secondary' onClick={() => setDeleteDialogContent({ name: theme.name, onDelete: () => deleteTheme(theme.id), open: true })}>
+                                                        <IconButton size='small' variant='contained' color='secondary' onClick={() => setDeleteDialogContent({ ...deleteDialogContent, name: theme.name, onDelete: () => deleteTheme(theme.id), isOpen: true })}>
                                                             <Delete />
                                                         </IconButton>
                                                     </TableCell>
@@ -80,14 +80,14 @@ function SettingsPage({ themes }) {
                                     </TableBody>
                                 </Table>
                             </TableContainer>
-                            <Button variant='contained' color='primary' onClick={() => setThemeDialogContent({ name: '', code: '', description: '', price: null, open: true })} style={{ marginTop: 16 }}>
+                            <Button variant='contained' color='primary' onClick={() => setThemeDialogContent({ ...themeDialogContent, isOpen: true })}>
                                 Novo tema
                             </Button>
                         </>
                     }
-                    {tabState.index === 1 &&
+                    {tabIndex === 1 &&
                         <>
-                            <Typography gutterBottom variant='h6' style={{ marginTop: 24 }}>
+                            <Typography gutterBottom variant='h6'>
                                 Sobre o desenvolvedor
                             </Typography>
                             <Typography gutterBottom>

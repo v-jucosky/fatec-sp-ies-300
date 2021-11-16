@@ -4,7 +4,7 @@ import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button }
 const deleteDialogDefaultContent = {
     name: '',
     onDelete: () => { return; },
-    open: false
+    isOpen: false
 };
 
 function DeleteDialog({ dialogContent, setDialogContent }) {
@@ -18,7 +18,7 @@ function DeleteDialog({ dialogContent, setDialogContent }) {
     };
 
     return (
-        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.isOpen} onClose={() => closeDialog()}>
             <DialogTitle>
                 Excluir
             </DialogTitle>

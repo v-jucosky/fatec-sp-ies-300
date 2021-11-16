@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Container, Typography, Card, CardContent, CardActions, Grid, Button } from '@material-ui/core';
 
-import PurchaseDialog from '../../components/PurchaseDialog';
-import { FEATURE, THEME } from '../../utils/settings/app';
+import PurchaseDialog, { purchaseDialogDefaultContent } from '../../components/PurchaseDialog';
+import { FEATURE, THEME } from '../../utils/utils/type';
 
 function StorePage({ auth, profile, themes, purchases }) {
-    const [purchaseDialogContent, setPurchaseDialogContent] = useState({ type: '', item: { name: '', price: 0 }, open: false });
+    const [purchaseDialogContent, setPurchaseDialogContent] = useState(purchaseDialogDefaultContent);
 
     return (
         <>
@@ -25,7 +25,7 @@ function StorePage({ auth, profile, themes, purchases }) {
                             <Grid item xs={6} md={3} style={{ display: 'flex' }}>
                                 <Card style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'column', width: '100%' }}>
                                     <CardContent>
-                                        <Typography gutterBottom variant='h6' style={{ color: theme.code }}>
+                                        <Typography gutterBottom variant='h6'>
                                             {theme.name}
                                         </Typography>
                                         <Typography gutterBottom>
@@ -33,7 +33,7 @@ function StorePage({ auth, profile, themes, purchases }) {
                                         </Typography>
                                     </CardContent>
                                     <CardActions>
-                                        <Button color='primary' size='small' disabled={purchases.map(purchase => purchase.item.id).includes(theme.id)} onClick={() => setPurchaseDialogContent({ type: THEME, item: { ...theme }, open: true })}>
+                                        <Button color='primary' size='small' disabled={purchases.map(purchase => purchase.item.id).includes(theme.id)} onClick={() => setPurchaseDialogContent({ ...purchaseDialogContent, type: THEME, item: { ...theme }, isOpen: true })}>
                                             {theme.price > 0 ?
                                                 'R$' + theme.price.toFixed(2)
                                                 :
@@ -64,7 +64,7 @@ function StorePage({ auth, profile, themes, purchases }) {
                                 </Typography>
                             </CardContent>
                             <CardActions>
-                                <Button disabled color='primary' size='small' onClick={() => setPurchaseDialogContent({ type: FEATURE, item: { name: 'Destaque de jogadas possíveis', price: 29.99, change: { highlightTiles: true } }, open: true })}>
+                                <Button disabled color='primary' size='small' onClick={() => setPurchaseDialogContent({ ...purchaseDialogContent, type: FEATURE, item: { name: 'Destaque de jogadas possíveis', price: 29.99 }, isOpen: true })}>
                                     Em breve
                                 </Button>
                             </CardActions>

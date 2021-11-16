@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2019 mathusummut
 function Confetti() {
-    let colors = ['DodgerBlue', 'OliveDrab', 'Gold', 'Pink', 'SlateBlue', 'LightBlue', 'Violet', 'PaleGreen', 'SteelBlue', 'SandyBrown', 'Chocolate', 'Crimson']
+    let colors = ['DodgerBlue', 'OliveDrab', 'Gold', 'Pink', 'SlateBlue', 'LightBlue', 'Violet', 'PaleGreen', 'SteelBlue', 'SandyBrown', 'Chocolate', 'Crimson'];
     let streamingConfetti = false;
     let animationTimer = null;
     let maxParticleCount = 150;
@@ -79,7 +79,7 @@ function Confetti() {
             canvas = document.createElement('canvas');
 
             canvas.setAttribute('id', 'confetti-canvas');
-            canvas.setAttribute('style', 'display:block;z-index:10000;pointer-events:none;position:absolute;width:100%;height:100%;top:0;left:0');
+            canvas.setAttribute('style', 'display:block;z-index:1250;pointer-events:none;position:absolute;width:100%;height:100%;top:0;left:0');
             document.body.appendChild(canvas);
 
             canvas.width = width;
@@ -100,7 +100,7 @@ function Confetti() {
         streamingConfetti = true;
 
         if (animationTimer === null) {
-            (function runAnimation() {
+            function runAnimation() {
                 context.clearRect(0, 0, window.innerWidth, window.innerHeight);
 
                 if (particles.length === 0) {
@@ -110,7 +110,9 @@ function Confetti() {
                     drawParticles(context);
                     animationTimer = window.requestAnimationFrame(runAnimation);
                 };
-            })();
+            };
+
+            runAnimation();
         };
     };
 

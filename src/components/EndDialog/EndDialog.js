@@ -3,8 +3,8 @@ import { useHistory } from 'react-router-dom';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from '@material-ui/core';
 
 const endDialogDefaultContent = {
-    open: false
-}
+    isOpen: false
+};
 
 function EndDialog({ dialogContent, setDialogContent }) {
     const pageHistory = useHistory();
@@ -14,7 +14,7 @@ function EndDialog({ dialogContent, setDialogContent }) {
     };
 
     return (
-        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.isOpen} onClose={() => closeDialog()}>
             <DialogTitle>
                 Fim
             </DialogTitle>

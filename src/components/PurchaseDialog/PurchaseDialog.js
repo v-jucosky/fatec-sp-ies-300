@@ -10,7 +10,7 @@ const purchaseDialogDefaultContent = {
         name: '',
         price: 0
     },
-    open: false
+    isOpen: false
 };
 
 function PurchaseDialog({ dialogContent, setDialogContent, auth, profile }) {
@@ -29,13 +29,13 @@ function PurchaseDialog({ dialogContent, setDialogContent, auth, profile }) {
     };
 
     return (
-        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.isOpen} onClose={() => closeDialog()}>
             <DialogTitle>
                 Adquirir
             </DialogTitle>
             <DialogContent>
                 <Typography gutterBottom>
-                    Seu saldo em conta é R${profile.balance.toFixed(2)}. Tem certeza que deseja adquirir “{dialogContent.item.name}” por R${dialogContent.item.price.toFixed(2)}?
+                    Seu saldo em conta é R$100.00. Tem certeza que deseja adquirir “{dialogContent.item.name}” por R${dialogContent.item.price.toFixed(2)}?
                 </Typography>
             </DialogContent>
             <DialogActions>

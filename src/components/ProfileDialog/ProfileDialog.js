@@ -1,17 +1,16 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { updateDoc, doc, serverTimestamp, Timestamp } from '@firebase/firestore';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, MenuItem, Button, Link as MaterialLink } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, MenuItem, Button } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
-import { DEFAULT_ACCENT_COLOR } from '../../utils/settings/app';
-import { THEME } from '../../utils/utils/types';
+import { DEFAULT_ACCENT_COLOR_CODE } from '../../utils/settings/app';
+import { THEME } from '../../utils/utils/type';
 
 const profileDialogDefaultContent = {
     displayName: '',
-    accentColor: DEFAULT_ACCENT_COLOR,
+    accentColorCode: DEFAULT_ACCENT_COLOR_CODE,
     createTimestamp: new Timestamp(),
-    open: false
+    isOpen: false
 };
 
 function ProfileDialog({ dialogContent, setDialogContent, auth, purchases }) {
@@ -22,7 +21,7 @@ function ProfileDialog({ dialogContent, setDialogContent, auth, purchases }) {
     function updateProfile() {
         updateDoc(doc(database, 'profiles', auth.currentUser.uid), {
             displayName: dialogContent.displayName,
-            accentColor: dialogContent.accentColor,
+            accentColorCode: dialogContent.accentColorCode,
             updateTimestamp: serverTimestamp()
         }).then(() => {
             closeDialog();
@@ -30,13 +29,13 @@ function ProfileDialog({ dialogContent, setDialogContent, auth, purchases }) {
     };
 
     return (
-        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.isOpen} onClose={() => closeDialog()}>
             <DialogTitle>
                 Editar perfil
             </DialogTitle>
             <DialogContent>
                 <Typography gutterBottom style={{ marginBottom: 16 }}>
-                    Atualize seu perfil e preferências. Mais temas estão disponíveis na <MaterialLink to='/loja' component={Link}>loja de temas</MaterialLink>.
+                    Atualize seu perfil e preferências. Mais temas estão disponíveis na Loja.
                 </Typography>
                 <TextField
                     required
@@ -53,14 +52,14 @@ function ProfileDialog({ dialogContent, setDialogContent, auth, purchases }) {
                     select
                     required
                     fullWidth
-                    id='accentColor'
+                    id='accentColorCode'
                     label='Cor de destaque'
                     variant='outlined'
-                    value={dialogContent.accentColor}
-                    onChange={(event) => setDialogContent({ ...dialogContent, accentColor: event.target.value })}
+                    value={dialogContent.accentColorCode}
+                    onChange={(event) => setDialogContent({ ...dialogContent, accentColorCode: event.target.value })}
                     style={{ marginBottom: 16 }}
                 >
-                    <MenuItem value={DEFAULT_ACCENT_COLOR}>
+                    <MenuItem value={DEFAULT_ACCENT_COLOR_CODE}>
                         Padrão
                     </MenuItem>
                     {purchases.map(purchase => {

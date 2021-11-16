@@ -8,9 +8,9 @@ const themeDialogDefaultContent = {
     name: '',
     description: '',
     price: 0,
-    code: '',
-    id: undefined,
-    open: false
+    colorCode: '',
+    themeId: undefined,
+    isOpen: false
 };
 
 function ThemeDialog({ dialogContent, setDialogContent }) {
@@ -21,7 +21,7 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
     function createTheme() {
         addDoc(collection(database, 'themes'), {
             name: dialogContent.name,
-            code: '#' + dialogContent.code,
+            colorCode: '#' + dialogContent.colorCode,
             description: dialogContent.description,
             price: parseFloat(parseFloat(dialogContent.price).toFixed(2)),
             createTimestamp: serverTimestamp(),
@@ -32,7 +32,7 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
     };
 
     function updateTheme() {
-        updateDoc(doc(database, 'themes', dialogContent.id), {
+        updateDoc(doc(database, 'themes', dialogContent.themeId), {
             description: dialogContent.description,
             price: parseFloat(parseFloat(dialogContent.price).toFixed(2)),
             updateTimestamp: serverTimestamp()
@@ -42,9 +42,9 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
     };
 
     return (
-        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.isOpen} onClose={() => closeDialog()}>
             <DialogTitle>
-                {'id' in dialogContent ?
+                {dialogContent.themeId ?
                     'Editar tema'
                     :
                     'Novo tema'
@@ -52,7 +52,7 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
             </DialogTitle>
             <DialogContent>
                 <Typography gutterBottom style={{ marginBottom: 16 }}>
-                    {'id' in dialogContent ?
+                    {dialogContent.themeId ?
                         'Edite a descrição e valor do tema.'
                         :
                         'Crie um novo tema, que ficará disponível aos jogadores através da loja.'
@@ -65,7 +65,7 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
                     id='name'
                     label='Nome'
                     variant='outlined'
-                    disabled={dialogContent.id}
+                    disabled={dialogContent.themeId}
                     value={dialogContent.name}
                     onChange={(event) => setDialogContent({ ...dialogContent, name: event.target.value })}
                     style={{ marginBottom: 16 }}
@@ -76,9 +76,9 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
                     id='code'
                     label='Código'
                     variant='outlined'
-                    disabled={dialogContent.id}
-                    value={dialogContent.code}
-                    onChange={(event) => setDialogContent({ ...dialogContent, code: event.target.value })}
+                    disabled={dialogContent.themeId}
+                    value={dialogContent.colorCode}
+                    onChange={(event) => setDialogContent({ ...dialogContent, colorCode: event.target.value })}
                     InputProps={{ startAdornment: <InputAdornment position='start'>#</InputAdornment> }}
                     style={{ marginBottom: 16 }}
                 />
@@ -109,7 +109,7 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
                 <Button color='primary' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
-                <Button color='primary' disabled={!(dialogContent.code.length === 6 && dialogContent.name.length > 0 && dialogContent.price)} onClick={() => dialogContent.id ? updateTheme() : createTheme()}>
+                <Button color='primary' disabled={!(dialogContent.colorCode.length === 6 && dialogContent.name.length > 0 && dialogContent.price)} onClick={() => dialogContent.themeId ? updateTheme() : createTheme()}>
                     Salvar
                 </Button>
             </DialogActions>

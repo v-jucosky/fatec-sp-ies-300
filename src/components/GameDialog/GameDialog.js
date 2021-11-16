@@ -1,14 +1,14 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { addDoc, collection, serverTimestamp } from '@firebase/firestore';
+import { addDoc, collection, serverTimestamp, Timestamp } from '@firebase/firestore';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, MenuItem, Button } from '@material-ui/core';
 
 import { database } from '../../utils/settings/firebase';
 
 const gameDialogDefaultContent = {
     name: '',
-    size: '6',
-    open: false
+    tileSize: '6',
+    isOpen: false
 };
 
 function GameDialog({ dialogContent, setDialogContent, auth }) {
@@ -21,17 +21,18 @@ function GameDialog({ dialogContent, setDialogContent, auth }) {
     function createGame() {
         addDoc(collection(database, 'games'), {
             name: dialogContent.name,
-            owner: auth.currentUser.uid,
-            currentPlayer: auth.currentUser.uid,
-            players: [
+            userId: auth.currentUser.uid,
+            currentUserId: auth.currentUser.uid,
+            participantUserIds: [
                 auth.currentUser.uid
             ],
-            sleep: [],
-            deck: {},
-            moves: 0,
-            size: parseInt(dialogContent.size),
-            running: false,
-            open: true,
+            sleepTiles: [],
+            moves: [],
+            deckContent: {},
+            moveCount: 0,
+            tileSize: parseInt(dialogContent.tileSize),
+            isRunning: false,
+            isOpen: true,
             createTimestamp: serverTimestamp(),
             updateTimestamp: serverTimestamp()
         }).then(document => {
@@ -41,7 +42,7 @@ function GameDialog({ dialogContent, setDialogContent, auth }) {
     };
 
     return (
-        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.open} onClose={() => closeDialog()}>
+        <Dialog maxWidth='sm' fullWidth={true} open={dialogContent.isOpen} onClose={() => closeDialog()}>
             <DialogTitle>
                 Novo jogo
             </DialogTitle>
@@ -64,11 +65,11 @@ function GameDialog({ dialogContent, setDialogContent, auth }) {
                     select
                     required
                     fullWidth
-                    id='size'
+                    id='tileSize'
                     label='Tamanho'
                     variant='outlined'
-                    value={dialogContent.size}
-                    onChange={(event) => setDialogContent({ ...dialogContent, size: event.target.value })}
+                    value={dialogContent.tileSize}
+                    onChange={(event) => setDialogContent({ ...dialogContent, tileSize: event.target.value })}
                 >
                     <MenuItem value='6'>
                         6

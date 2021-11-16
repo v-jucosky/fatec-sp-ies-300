@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Switch, Route, useHistory } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
-import { doc, onSnapshot, collection, query, where, Timestamp } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import { AppBar, Toolbar, Container, IconButton } from '@material-ui/core';
 import { Home, AccountCircle, ExitToApp, Store, Settings } from '@material-ui/icons';
 import { MuiThemeProvider, createTheme } from '@material-ui/core/styles';
@@ -12,9 +12,9 @@ import HomePage from './pages/HomePage';
 import SettingsPage from './pages/SettingsPage';
 import StorePage from './pages/StorePage';
 import GamePage from './pages/GamePage';
-import ProfileDialog from './components/ProfileDialog';
+import ProfileDialog, { profileDialogDefaultContent } from './components/ProfileDialog';
 import { firebaseApp, database } from './utils/settings/firebase';
-import { DEFAULT_ACCENT_COLOR } from './utils/settings/app';
+import { DEFAULT_ACCENT_COLOR_CODE } from './utils/settings/app';
 import { arrayUpdate, objectUpdate } from './utils/utils/common';
 
 function App() {
@@ -24,7 +24,7 @@ function App() {
     const [purchases, setPurchases] = useState([]);
     const [games, setGames] = useState([]);
     const [themes, setThemes] = useState([]);
-    const [profileDialogContent, setProfileDialogContent] = useState({ displayName: '', accentColor: DEFAULT_ACCENT_COLOR, createTimestamp: new Timestamp(), open: false });
+    const [profileDialogContent, setProfileDialogContent] = useState(profileDialogDefaultContent);
 
     useEffect(() => {
         let unsubscribeProfile = () => { return };
@@ -42,7 +42,7 @@ function App() {
                     arrayUpdate(snapshot, purchases, setPurchases);
                 });
 
-                unsubscribeGames = onSnapshot(query(collection(database, 'games'), where('players', 'array-contains', auth.currentUser.uid)), snapshot => {
+                unsubscribeGames = onSnapshot(query(collection(database, 'games'), where('participantUserIds', 'array-contains', auth.currentUser.uid)), snapshot => {
                     arrayUpdate(snapshot, games, setGames);
                 });
 
@@ -68,7 +68,7 @@ function App() {
     }, []);
 
     return (
-        <MuiThemeProvider theme={createTheme({ palette: { primary: { main: profile.accentColor || DEFAULT_ACCENT_COLOR } } })}>
+        <MuiThemeProvider theme={createTheme({ palette: { primary: { main: profile.accentColor || DEFAULT_ACCENT_COLOR_CODE } } })}>
             {auth.currentUser ? (
                 <>
                     <AppBar position='sticky'>
@@ -77,7 +77,7 @@ function App() {
                                 <Home />
                             </IconButton>
                             <Container style={{ flexGrow: 1 }} />
-                            {profile.superUser &&
+                            {profile.isSuperUser &&
                                 <IconButton color='inherit' onClick={() => pageHistory.push('/configuracao')}>
                                     <Settings />
                                 </IconButton>
@@ -85,7 +85,7 @@ function App() {
                             <IconButton color='inherit' onClick={() => pageHistory.push('/loja')}>
                                 <Store />
                             </IconButton>
-                            <IconButton color='inherit' onClick={() => setProfileDialogContent({ ...profile, open: true })}>
+                            <IconButton color='inherit' onClick={() => setProfileDialogContent({ ...profile, isOpen: true })}>
                                 <AccountCircle />
                             </IconButton>
                             <IconButton color='inherit' onClick={() => signOut(auth)}>
@@ -97,7 +97,7 @@ function App() {
                         <Route exact path='/'>
                             <HomePage auth={auth} profile={profile} games={games} />
                         </Route>
-                        {profile.superUser &&
+                        {profile.isSuperUser &&
                             <Route exact path='/configuracao'>
                                 <SettingsPage auth={auth} profile={profile} themes={themes} />
                             </Route>

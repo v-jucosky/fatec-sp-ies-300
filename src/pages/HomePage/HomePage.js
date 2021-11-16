@@ -4,16 +4,16 @@ import { doc, deleteDoc } from 'firebase/firestore';
 import { Container, Typography, IconButton, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper } from '@material-ui/core';
 import { Delete, PlayArrow, Visibility } from '@material-ui/icons';
 
-import JoinDialog from '../../components/JoinDialog';
-import GameDialog from '../../components/GameDialog';
-import DeleteDialog from '../../components/DeleteDialog';
+import JoinDialog, { joinDialogDefaultContent } from '../../components/JoinDialog';
+import GameDialog, { gameDialogDefaultContent } from '../../components/GameDialog';
+import DeleteDialog, { deleteDialogDefaultContent } from '../../components/DeleteDialog';
 import { database } from '../../utils/settings/firebase';
 
 function HomePage({ auth, profile, games }) {
     const pageHistory = useHistory();
-    const [joinDialogContent, setJoinDialogContent] = useState({ id: '', open: false });
-    const [gameDialogContent, setGameDialogContent] = useState({ name: '', size: 6, open: false });
-    const [deleteDialogContent, setDeleteDialogContent] = useState({ name: '', onDelete: undefined, open: false });
+    const [joinDialogContent, setJoinDialogContent] = useState(joinDialogDefaultContent);
+    const [gameDialogContent, setGameDialogContent] = useState(gameDialogDefaultContent);
+    const [deleteDialogContent, setDeleteDialogContent] = useState(deleteDialogDefaultContent);
 
     function deleteGame(id) {
         deleteDoc(doc(database, 'games', id));
@@ -60,23 +60,23 @@ function HomePage({ auth, profile, games }) {
                                             {game.name}
                                         </TableCell>
                                         <TableCell>
-                                            {game.size}
+                                            {game.tileSize}
                                         </TableCell>
                                         <TableCell>
-                                            {game.players.length}
+                                            {game.participantUserIds.length}
                                         </TableCell>
                                         <TableCell>
                                             {game.createTimestamp?.toDate().toLocaleDateString()}
                                         </TableCell>
                                         <TableCell>
                                             <IconButton size='small' variant='contained' color='primary' onClick={() => pageHistory.push('/jogo/' + game.id)} style={{ marginRight: 4 }}>
-                                                {(game.running || game.open) ?
+                                                {(game.isRunning || game.isOpen) ?
                                                     <PlayArrow />
                                                     :
                                                     <Visibility />
                                                 }
                                             </IconButton>
-                                            <IconButton size='small' variant='contained' color='secondary' disabled={game.owner !== auth.currentUser.uid} onClick={() => setDeleteDialogContent({ name: game.id, onDelete: () => deleteGame(game.id), open: true })}>
+                                            <IconButton size='small' variant='contained' color='secondary' disabled={game.userId !== auth.currentUser.uid} onClick={() => setDeleteDialogContent({ ...deleteDialogContent, name: game.name, onDelete: () => deleteGame(game.id), isOpen: true })}>
                                                 <Delete />
                                             </IconButton>
                                         </TableCell>
@@ -86,10 +86,10 @@ function HomePage({ auth, profile, games }) {
                         </TableBody>
                     </Table>
                 </TableContainer>
-                <Button variant='contained' color='primary' onClick={() => setGameDialogContent({ name: '', size: '6', open: true })} style={{ marginRight: 16 }}>
+                <Button variant='contained' color='primary' onClick={() => setGameDialogContent({ ...gameDialogContent, isOpen: true })} style={{ marginRight: 16 }}>
                     Novo jogo
                 </Button>
-                <Button variant='contained' color='primary' onClick={() => setJoinDialogContent({ id: '', open: true })}>
+                <Button variant='contained' color='primary' onClick={() => setJoinDialogContent({ ...joinDialogContent, isOpen: true })}>
                     Entrar em um jogo
                 </Button>
             </Container>
