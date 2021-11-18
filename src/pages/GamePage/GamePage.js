@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState, Fragment } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
 import { doc, getDoc, updateDoc, onSnapshot, arrayUnion, arrayRemove, collection, query, where, increment, serverTimestamp, Timestamp } from 'firebase/firestore';
-import { Container, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, CardContent, CardActions, Tooltip } from '@material-ui/core';
+import { Container, Grid, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Snackbar, Card, CardContent, CardActions, Tooltip } from '@material-ui/core';
+import { useSnackbar } from 'notistack';
+import { Create, Add } from '@material-ui/icons';
 
 import EndDialog, { endDialogDefaultContent } from '../../components/EndDialog';
+import MessageDialog, { messageDialogDefaultContent } from '../../components/MessageDialog';
 import Confetti from '../../assets/Confetti';
 import { database } from '../../utils/settings/firebase';
 import { arrayUpdate } from '../../utils/utils/common';
@@ -24,11 +26,13 @@ const currentMoveDefaultValue = {
 function GamePage({ auth, profile, games }) {
     const pageHistory = useHistory();
     const { gameId } = useParams();
+    const { enqueueSnackbar } = useSnackbar();
     const { startConfetti, stopConfetti } = Confetti();
     const [profiles, setProfiles] = useState([]);
     const [game, setGame] = useState({ name: '', userId: '', currentUserId: '', participantUserIds: [], sleepTiles: [], moves: [], deckContent: {}, moveCount: 0, tileSize: 6, isRunning: false, isOpen: true, createTimestamp: new Timestamp(), updateTimestamp: new Timestamp() });
     const [currentMove, setCurrentMove] = useState(currentMoveDefaultValue);
     const [endDialogContent, setEndDialogContent] = useState(endDialogDefaultContent);
+    const [messageDialogContent, setMessageDialogContent] = useState(messageDialogDefaultContent);
 
     useEffect(() => {
         getDoc(doc(database, 'games', gameId))
@@ -57,6 +61,42 @@ function GamePage({ auth, profile, games }) {
                     return;
                 };
             });
+
+        const unsubscribeMessages = onSnapshot(query(collection(database, 'games', gameId, 'messages'), where('createTimestamp', '>=', Timestamp.now())), snapshot => {
+            snapshot.docChanges()
+                .forEach(change => {
+                    if (change.type === 'added') {
+                        let data = change.doc.data();
+
+                        if (data.isAnonymous) {
+                            enqueueSnackbar(data.content, {
+                                style: {
+                                    width: '200px',
+                                    wordBreak: 'break-all'
+                                }
+                            });
+                        } else {
+                            enqueueSnackbar(data.content, {
+                                action: (key) => {
+                                    return (
+                                        <Fragment>
+                                            <Typography variant='overline'>
+                                                {profiles.filter(profile => profile.userId === data.userId)[0]?.displayName}
+                                            </Typography>
+                                        </Fragment>
+                                    );
+                                },
+                                style: {
+                                    width: '200px',
+                                    wordBreak: 'break-all'
+                                }
+                            });
+                        };
+                    };
+                });
+        });
+
+        return unsubscribeMessages;
     }, []);
 
     useEffect(() => {
@@ -326,13 +366,29 @@ function GamePage({ auth, profile, games }) {
                     </CardActions>
                 </Card>
             </Container>
+            <Grid container justifyContent='flex-end' alignItems='center' spacing={2} style={{ position: 'absolute', bottom: 64, right: 64 }}>
+                <Grid item>
+                    <Fab variant='extended' color='primary' onClick={() => setMessageDialogContent({ ...messageDialogDefaultContent, isOpen: true })}>
+                        <Create style={{ marginRight: 8 }} />
+                        Mensagem
+                    </Fab>
+                </Grid>
+                <Grid item>
+                    <Fab variant='extended' color='secondary' onClick={() => getTile()} disabled={game.sleepTiles.length === 0 || game.isOpen}>
+                        <Add style={{ marginRight: 8 }} />
+                        Dorme
+                    </Fab>
+                </Grid>
+            </Grid>
             <EndDialog
                 dialogContent={endDialogContent}
                 setDialogContent={setEndDialogContent}
             />
-            <Fab variant='extended' color='secondary' onClick={() => getTile()} disabled={game.sleepTiles.length === 0 || game.isOpen} style={{ position: 'absolute', bottom: 64, right: 64 }} >
-                Dorme
-            </Fab>
+            <MessageDialog
+                dialogContent={messageDialogContent}
+                setDialogContent={setMessageDialogContent}
+                auth={auth}
+            />
         </>
     );
 };
