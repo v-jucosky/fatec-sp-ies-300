@@ -45,6 +45,9 @@ function HomePage({ auth, profile, games }) {
                                     Jogadores
                                 </TableCell>
                                 <TableCell>
+                                    Jogadas
+                                </TableCell>
+                                <TableCell>
                                     Data de início
                                 </TableCell>
                                 <TableCell>
@@ -64,6 +67,9 @@ function HomePage({ auth, profile, games }) {
                                         </TableCell>
                                         <TableCell>
                                             {game.participantUserIds.length}
+                                        </TableCell>
+                                        <TableCell>
+                                            {game.moves.length}
                                         </TableCell>
                                         <TableCell>
                                             {game.createTimestamp?.toDate().toLocaleDateString()}

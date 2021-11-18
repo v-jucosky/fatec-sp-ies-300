@@ -65,7 +65,7 @@ function ProfileDialog({ dialogContent, setDialogContent, auth, purchases }) {
                     {purchases.map(purchase => {
                         if (purchase.type === THEME) {
                             return (
-                                <MenuItem value={purchase.item.code}>
+                                <MenuItem value={purchase.item.colorCode}>
                                     {purchase.item.name}
                                 </MenuItem>
                             );

@@ -3,6 +3,7 @@ import { Switch, Route, useHistory } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import { AppBar, Toolbar, Container, IconButton } from '@material-ui/core';
+import { SnackbarProvider } from 'notistack';
 import { Home, AccountCircle, ExitToApp, Store, Settings } from '@material-ui/icons';
 import { MuiThemeProvider, createTheme } from '@material-ui/core/styles';
 
@@ -68,9 +69,9 @@ function App() {
     }, []);
 
     return (
-        <MuiThemeProvider theme={createTheme({ palette: { primary: { main: profile.accentColor || DEFAULT_ACCENT_COLOR_CODE } } })}>
+        <MuiThemeProvider theme={createTheme({ palette: { primary: { main: profile.accentColorCode || DEFAULT_ACCENT_COLOR_CODE } } })}>
             {auth.currentUser ? (
-                <>
+                <SnackbarProvider maxSnack={10}>
                     <AppBar position='sticky'>
                         <Toolbar>
                             <IconButton color='inherit' onClick={() => pageHistory.push('/')}>
@@ -115,7 +116,7 @@ function App() {
                         auth={auth}
                         purchases={purchases}
                     />
-                </>
+                </SnackbarProvider>
             ) : (
                 <>
                     <AppBar position='sticky'>

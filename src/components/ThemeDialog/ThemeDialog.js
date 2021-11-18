@@ -7,7 +7,7 @@ import { database } from '../../utils/settings/firebase';
 const themeDialogDefaultContent = {
     name: '',
     description: '',
-    price: 0,
+    price: '0',
     colorCode: '',
     themeId: undefined,
     isOpen: false
