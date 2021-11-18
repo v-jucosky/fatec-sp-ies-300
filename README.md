@@ -11,7 +11,7 @@ Construir um jogo de dominó online multijogador, que deverá possuir:
 - [x] Capacidade de personalização através de um “super usuário”
 - [x] Recursos monetizáveis
 - [x] Funcionalidade básica do jogo
-- [ ] (Extra) Chat entre jogadores de uma mesma partida
+- [x] (Extra) Chat entre jogadores de uma mesma partida
 
 ## Arquitetura
 
