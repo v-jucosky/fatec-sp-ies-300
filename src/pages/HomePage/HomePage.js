@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { doc, deleteDoc } from 'firebase/firestore';
-import { Container, Typography, IconButton, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper } from '@material-ui/core';
-import { Delete, PlayArrow, Visibility } from '@material-ui/icons';
+import { Container, Typography, IconButton, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper, Stack } from '@mui/material';
+import { Delete, PlayArrow, Visibility, Stars } from '@mui/icons-material';
 
 import JoinDialog, { joinDialogDefaultContent } from '../../components/JoinDialog';
 import GameDialog, { gameDialogDefaultContent } from '../../components/GameDialog';
@@ -75,16 +75,23 @@ function HomePage({ auth, profile, games }) {
                                             {game.createTimestamp?.toDate().toLocaleDateString()}
                                         </TableCell>
                                         <TableCell>
-                                            <IconButton size='small' variant='contained' color='primary' onClick={() => pageHistory.push('/jogo/' + game.id)} style={{ marginRight: 4 }}>
-                                                {(game.isRunning || game.isOpen) ?
-                                                    <PlayArrow />
-                                                    :
-                                                    <Visibility />
+                                            <Stack direction='row' justifyContent='flex-end' spacing={2}>
+                                                {(game.currentUserId === auth.currentUser.uid && !game.isRunning && !game.isOpen) &&
+                                                    <IconButton size='small' variant='contained' color='primary' style={{ marginRight: 4 }}>
+                                                        <Stars />
+                                                    </IconButton>
                                                 }
-                                            </IconButton>
-                                            <IconButton size='small' variant='contained' color='secondary' disabled={game.userId !== auth.currentUser.uid} onClick={() => setDeleteDialogContent({ ...deleteDialogContent, name: game.name, onDelete: () => deleteGame(game.id), isOpen: true })}>
-                                                <Delete />
-                                            </IconButton>
+                                                <IconButton size='small' variant='contained' color='primary' onClick={() => pageHistory.push('/jogo/' + game.id)} style={{ marginRight: 4 }}>
+                                                    {(game.isRunning || game.isOpen) ?
+                                                        <PlayArrow />
+                                                        :
+                                                        <Visibility />
+                                                    }
+                                                </IconButton>
+                                                <IconButton size='small' variant='contained' color='secondary' disabled={game.userId !== auth.currentUser.uid} onClick={() => setDeleteDialogContent({ ...deleteDialogContent, name: game.name, onDelete: () => deleteGame(game.id), isOpen: true })}>
+                                                    <Delete />
+                                                </IconButton>
+                                            </Stack>
                                         </TableCell>
                                     </TableRow>
                                 );
@@ -102,6 +109,7 @@ function HomePage({ auth, profile, games }) {
             <JoinDialog
                 dialogContent={joinDialogContent}
                 setDialogContent={setJoinDialogContent}
+                auth={auth}
             />
             <GameDialog
                 dialogContent={gameDialogContent}

@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { setDoc, doc, serverTimestamp } from 'firebase/firestore';
-import { Container, Typography, Button, TextField } from '@material-ui/core';
-import { Alert } from '@material-ui/lab';
+import { Container, Typography, Button, TextField } from '@mui/material';
+import { Alert } from '@mui/lab';
 
 import { database } from '../../utils/settings/firebase';
 import { DEFAULT_ACCENT_COLOR_CODE } from '../../utils/settings/app';

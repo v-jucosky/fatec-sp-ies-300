@@ -1,9 +1,9 @@
 import React, { useEffect, useState, Fragment } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
-import { doc, getDoc, updateDoc, onSnapshot, arrayUnion, arrayRemove, collection, query, where, increment, serverTimestamp, Timestamp } from 'firebase/firestore';
-import { Container, Grid, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Snackbar, Card, CardContent, CardActions, Tooltip } from '@material-ui/core';
+import { useParams } from 'react-router-dom';
+import { doc, updateDoc, onSnapshot, arrayUnion, arrayRemove, collection, query, where, increment, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { Container, Grid, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, CardContent, CardActions, Tooltip } from '@mui/material';
 import { useSnackbar } from 'notistack';
-import { Create, Add } from '@material-ui/icons';
+import { Create, Add } from '@mui/icons-material';
 
 import EndDialog, { endDialogDefaultContent } from '../../components/EndDialog';
 import MessageDialog, { messageDialogDefaultContent } from '../../components/MessageDialog';
@@ -11,7 +11,7 @@ import Confetti from '../../assets/Confetti';
 import { database } from '../../utils/settings/firebase';
 import { arrayUpdate } from '../../utils/utils/common';
 import { buildSleep, getTileFromSleep, flipTile } from '../../utils/utils/game';
-import { DECK_START_SIZE, MAXIMUM_NUMBER_PLAYERS, SYSTEM_PLAYER_DISPLAY_NAME } from '../../utils/settings/app';
+import { DECK_START_SIZE, SYSTEM_PLAYER_DISPLAY_NAME } from '../../utils/settings/app';
 
 const currentMoveDefaultValue = {
     deckSelection: {
@@ -24,7 +24,6 @@ const currentMoveDefaultValue = {
 };
 
 function GamePage({ auth, profile, games }) {
-    const pageHistory = useHistory();
     const { gameId } = useParams();
     const { enqueueSnackbar } = useSnackbar();
     const { startConfetti, stopConfetti } = Confetti();
@@ -35,33 +34,6 @@ function GamePage({ auth, profile, games }) {
     const [messageDialogContent, setMessageDialogContent] = useState(messageDialogDefaultContent);
 
     useEffect(() => {
-        getDoc(doc(database, 'games', gameId))
-            .then(document => {
-                let game = document.data();
-
-                try {
-                    if (!game.participantUserIds.includes(auth.currentUser.uid)) {
-                        if (!game.isOpen) {
-                            alert('Este jogo não está aberto.');
-                            pageHistory.push('/');
-                            return;
-                        } else if (game.participantUserIds.length >= MAXIMUM_NUMBER_PLAYERS) {
-                            alert('Número máximo de jogadores atingido.');
-                            pageHistory.push('/');
-                            return;
-                        } else {
-                            updateDoc(doc(database, 'games', gameId), {
-                                participantUserIds: arrayUnion(auth.currentUser.uid)
-                            });
-                        };
-                    };
-                } catch (error) {
-                    alert('Não foi possível entrar neste jogo (' + error + ').');
-                    pageHistory.push('/');
-                    return;
-                };
-            });
-
         const unsubscribeMessages = onSnapshot(query(collection(database, 'games', gameId, 'messages'), where('createTimestamp', '>=', Timestamp.now())), snapshot => {
             snapshot.docChanges()
                 .forEach(change => {

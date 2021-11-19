@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { addDoc, collection, serverTimestamp } from '@firebase/firestore';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, Button, FormControlLabel, Switch } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, Button, FormControlLabel, Switch } from '@mui/material';
 
 import { database } from '../../utils/settings/firebase';
 

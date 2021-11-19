@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, Typography, Card, CardContent, CardActions, Grid, Button, CardActionArea } from '@material-ui/core';
+import { Container, Typography, Card, CardContent, CardActions, Grid, Button, CardActionArea } from '@mui/material';
 
 import PurchaseDialog, { purchaseDialogDefaultContent } from '../../components/PurchaseDialog';
 import { FEATURE, THEME } from '../../utils/utils/type';

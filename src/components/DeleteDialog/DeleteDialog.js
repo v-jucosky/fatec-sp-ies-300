@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from '@mui/material';
 
 const deleteDialogDefaultContent = {
     name: '',

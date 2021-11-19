@@ -1,6 +1,6 @@
 import React from 'react';
 import { addDoc, updateDoc, collection, serverTimestamp, doc } from '@firebase/firestore';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, InputAdornment, Button } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, InputAdornment, Button } from '@mui/material';
 
 import { database } from '../../utils/settings/firebase';
 

@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Switch, Route, useHistory } from 'react-router-dom';
 import { getAuth, signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot, collection, query, where } from 'firebase/firestore';
-import { AppBar, Toolbar, Container, IconButton } from '@material-ui/core';
+import { AppBar, Toolbar, Container, IconButton } from '@mui/material';
 import { SnackbarProvider } from 'notistack';
-import { Home, AccountCircle, ExitToApp, Store, Settings } from '@material-ui/icons';
-import { MuiThemeProvider, createTheme } from '@material-ui/core/styles';
+import { Home, AccountCircle, ExitToApp, Store, Settings } from '@mui/icons-material';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -69,7 +69,7 @@ function App() {
     }, []);
 
     return (
-        <MuiThemeProvider theme={createTheme({ palette: { primary: { main: profile.accentColorCode || DEFAULT_ACCENT_COLOR_CODE } } })}>
+        <ThemeProvider theme={createTheme({ palette: { primary: { main: profile.accentColorCode || DEFAULT_ACCENT_COLOR_CODE } } })}>
             {auth.currentUser ? (
                 <SnackbarProvider maxSnack={10}>
                     <AppBar position='sticky'>
@@ -136,7 +136,7 @@ function App() {
                     </Switch>
                 </>
             )}
-        </MuiThemeProvider>
+        </ThemeProvider>
     );
 };
 

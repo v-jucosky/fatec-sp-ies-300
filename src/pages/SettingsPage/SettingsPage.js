@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { doc, deleteDoc } from 'firebase/firestore';
-import { Container, Typography, IconButton, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper, Box, Tabs, Tab } from '@material-ui/core';
-import { Delete, Edit } from '@material-ui/icons';
+import { Container, Typography, IconButton, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper, Box, Tabs, Tab } from '@mui/material';
+import { Delete, Edit } from '@mui/icons-material';
 
 import ThemeDialog, { themeDialogDefaultContent } from '../../components/ThemeDialog';
 import DeleteDialog, { deleteDialogDefaultContent } from '../../components/DeleteDialog';

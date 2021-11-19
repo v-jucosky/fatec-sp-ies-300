@@ -1,6 +1,6 @@
 import React from 'react';
 import { updateDoc, doc, serverTimestamp, Timestamp } from '@firebase/firestore';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, MenuItem, Button } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, MenuItem, Button } from '@mui/material';
 
 import { database } from '../../utils/settings/firebase';
 import { DEFAULT_ACCENT_COLOR_CODE } from '../../utils/settings/app';

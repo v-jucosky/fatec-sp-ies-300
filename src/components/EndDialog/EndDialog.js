@@ -1,6 +1,6 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from '@material-ui/core';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from '@mui/material';
 
 const endDialogDefaultContent = {
     isOpen: false

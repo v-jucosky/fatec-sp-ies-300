@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { Container, Typography, Button, TextField } from '@material-ui/core';
-import { Alert } from '@material-ui/lab';
+import { Container, Typography, Button, TextField } from '@mui/material';
+import { Alert } from '@mui/lab';
 
 function LoginPage({ auth }) {
     const [formContent, setFormContent] = useState({
