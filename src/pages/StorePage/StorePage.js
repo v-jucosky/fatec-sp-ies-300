@@ -16,8 +16,8 @@ function StorePage({ auth, profile, themes, purchases }) {
                 <Typography gutterBottom variant='h6'>
                     Temas
                 </Typography>
-                <Typography gutterBottom style={{ marginBottom: 16 }}>
-                    Adquira temas para mudar como seu perfil é visto por outros usuários e a aparência da interface.
+                <Typography style={{ marginBottom: 16 }}>
+                    Adquira temas para mudar a aparência da interface. Novos temas são adicionados constantemente!
                 </Typography>
                 <Grid container spacing={3} style={{ marginBottom: 16 }}>
                     {themes.map(theme => {
@@ -29,7 +29,7 @@ function StorePage({ auth, profile, themes, purchases }) {
                                             <Typography gutterBottom variant='h6'>
                                                 {theme.name}
                                             </Typography>
-                                            <Typography gutterBottom>
+                                            <Typography>
                                                 {theme.description}
                                             </Typography>
                                         </CardContent>
@@ -49,9 +49,9 @@ function StorePage({ auth, profile, themes, purchases }) {
                     })}
                 </Grid>
                 <Typography gutterBottom variant='h6'>
-                    Recursos
+                    Recursos e funcionalidades extras
                 </Typography>
-                <Typography gutterBottom style={{ marginBottom: 16 }}>
+                <Typography style={{ marginBottom: 16 }}>
                     Adquira recursos e funcionalidades de jogo.
                 </Typography>
                 <Grid container spacing={3}>
@@ -61,7 +61,7 @@ function StorePage({ auth, profile, themes, purchases }) {
                                 <Typography gutterBottom variant='h6'>
                                     Destaque de jogadas possíveis
                                 </Typography>
-                                <Typography gutterBottom>
+                                <Typography>
                                     As jogadas possíveis ficarão em destaque. Note que não há como desativar este recurso após adquiri-lo.
                                 </Typography>
                             </CardContent>
@@ -78,8 +78,8 @@ function StorePage({ auth, profile, themes, purchases }) {
                                 <Typography gutterBottom variant='h6'>
                                     Envio de mensagens nos jogos
                                 </Typography>
-                                <Typography gutterBottom>
-                                    Você poderá enviar mensagens para todos os jogadores de um jogo. As mensagens aparecerão na cor do seu tema!
+                                <Typography>
+                                    Você poderá enviar mensagens para todos os jogadores de um jogo, anonimamente ou não!
                                 </Typography>
                             </CardContent>
                             <CardActions>

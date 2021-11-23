@@ -31,7 +31,7 @@ function LoginPage({ auth }) {
             <Typography gutterBottom variant='h4'>
                 Login
             </Typography>
-            <Typography gutterBottom style={{ marginBottom: 16 }}>
+            <Typography style={{ marginBottom: 16 }}>
                 Realize o login para poder jogar ou registre-se.
             </Typography>
             {Object.keys(formContent.validationErrors).map(errorCode => {

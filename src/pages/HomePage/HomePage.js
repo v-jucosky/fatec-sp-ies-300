@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { doc, deleteDoc } from 'firebase/firestore';
-import { Container, Typography, IconButton, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper, Stack } from '@mui/material';
+import { Container, Typography, IconButton, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper, Stack, Divider } from '@mui/material';
 import { Delete, PlayArrow, Visibility, Stars } from '@mui/icons-material';
 
 import JoinDialog, { joinDialogDefaultContent } from '../../components/JoinDialog';
@@ -29,12 +29,13 @@ function HomePage({ auth, profile, games }) {
                     <Typography gutterBottom variant='h6' style={{ margin: 16 }}>
                         Jogos
                     </Typography>
-                    <Typography gutterBottom style={{ margin: 16 }}>
+                    <Typography style={{ margin: 16 }}>
                         Continue seus jogos ou apage-os. Note que apagar um jogo tabém exclui o chat daquela partida.
                     </Typography>
                     <Table>
                         <TableHead>
                             <TableRow>
+                                <TableCell />
                                 <TableCell>
                                     Nome
                                 </TableCell>
@@ -59,6 +60,13 @@ function HomePage({ auth, profile, games }) {
                             {games.map(game => {
                                 return (
                                     <TableRow>
+                                        <TableCell style={{ width: '0%' }}>
+                                            {(game.currentUserId === auth.currentUser.uid && !game.isRunning && !game.isOpen) &&
+                                                <IconButton size='small' variant='contained' color='secondary'>
+                                                    <Stars />
+                                                </IconButton>
+                                            }
+                                        </TableCell>
                                         <TableCell>
                                             {game.name}
                                         </TableCell>
@@ -74,14 +82,9 @@ function HomePage({ auth, profile, games }) {
                                         <TableCell>
                                             {game.createTimestamp?.toDate().toLocaleDateString()}
                                         </TableCell>
-                                        <TableCell>
-                                            <Stack direction='row' justifyContent='flex-end' spacing={2}>
-                                                {(game.currentUserId === auth.currentUser.uid && !game.isRunning && !game.isOpen) &&
-                                                    <IconButton size='small' variant='contained' color='primary' style={{ marginRight: 4 }}>
-                                                        <Stars />
-                                                    </IconButton>
-                                                }
-                                                <IconButton size='small' variant='contained' color='primary' onClick={() => pageHistory.push('/jogo/' + game.id)} style={{ marginRight: 4 }}>
+                                        <TableCell style={{ width: '0%' }}>
+                                            <Stack direction='row' justifyContent='flex-end' spacing={1} divider={<Divider flexItem orientation='vertical' />}>
+                                                <IconButton size='small' variant='contained' color='primary' onClick={() => pageHistory.push('/jogo/' + game.id)}>
                                                     {(game.isRunning || game.isOpen) ?
                                                         <PlayArrow />
                                                         :

@@ -54,7 +54,7 @@ function JoinDialog({ dialogContent, setDialogContent, auth }) {
                 Entrar em um jogo
             </DialogTitle>
             <DialogContent>
-                <Typography gutterBottom style={{ marginBottom: 16 }}>
+                <Typography style={{ marginBottom: 16 }}>
                     Para entrar em um jogo, cole ou digite o ID abaixo (20 caracteres).
                 </Typography>
                 <TextField
@@ -69,7 +69,7 @@ function JoinDialog({ dialogContent, setDialogContent, auth }) {
                 />
             </DialogContent>
             <DialogActions>
-                <Button color='primary' onClick={() => closeDialog()}>
+                <Button color='neutral' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
                 <Button color='primary' disabled={dialogContent.gameId.length !== 20} onClick={() => joinGame()}>

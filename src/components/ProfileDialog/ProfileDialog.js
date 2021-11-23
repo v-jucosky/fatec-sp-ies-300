@@ -34,8 +34,8 @@ function ProfileDialog({ dialogContent, setDialogContent, auth, purchases }) {
                 Editar perfil
             </DialogTitle>
             <DialogContent>
-                <Typography gutterBottom style={{ marginBottom: 16 }}>
-                    Atualize seu perfil e preferências. Mais temas estão disponíveis na Loja.
+                <Typography style={{ marginBottom: 16 }}>
+                    Atualize seu perfil e preferências. Mais temas estão disponíveis na loja.
                 </Typography>
                 <TextField
                     required
@@ -82,10 +82,10 @@ function ProfileDialog({ dialogContent, setDialogContent, auth, purchases }) {
                 />
             </DialogContent>
             <DialogActions>
-                <Button color='primary' onClick={() => closeDialog()}>
+                <Button color='neutral' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
-                <Button color='primary' disabled={!(dialogContent.displayName.length > 0)} onClick={() => updateProfile()}>
+                <Button color='primary' disabled={dialogContent.displayName.length === 0} onClick={() => updateProfile()}>
                     Salvar
                 </Button>
             </DialogActions>

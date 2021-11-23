@@ -23,12 +23,12 @@ function DeleteDialog({ dialogContent, setDialogContent }) {
                 Excluir
             </DialogTitle>
             <DialogContent>
-                <Typography gutterBottom>
+                <Typography>
                     Tem certeza de que deseja excluir “{dialogContent.name}”? Não será possível desfazer esta operação.
                 </Typography>
             </DialogContent>
             <DialogActions>
-                <Button color='primary' onClick={() => closeDialog()}>
+                <Button color='neutral' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
                 <Button color='primary' onClick={() => deleteItem()}>

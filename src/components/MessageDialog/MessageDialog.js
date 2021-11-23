@@ -35,7 +35,7 @@ function MessageDialog({ dialogContent, setDialogContent, auth }) {
                 Mensagem
             </DialogTitle>
             <DialogContent>
-                <Typography gutterBottom style={{ marginBottom: 16 }}>
+                <Typography style={{ marginBottom: 16 }}>
                     A mensagem abaixo será enviada para todos os jogadores neste jogo.
                 </Typography>
                 <TextField
@@ -63,7 +63,7 @@ function MessageDialog({ dialogContent, setDialogContent, auth }) {
                 />
             </DialogContent>
             <DialogActions>
-                <Button color='primary' onClick={() => closeDialog()}>
+                <Button color='neutral' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
                 <Button color='primary' disabled={dialogContent.content.length === 0} onClick={() => createMessage()}>

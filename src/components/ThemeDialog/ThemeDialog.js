@@ -51,7 +51,7 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
                 }
             </DialogTitle>
             <DialogContent>
-                <Typography gutterBottom style={{ marginBottom: 16 }}>
+                <Typography style={{ marginBottom: 16 }}>
                     {dialogContent.themeId ?
                         'Edite a descrição e valor do tema.'
                         :
@@ -106,10 +106,10 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
                 />
             </DialogContent>
             <DialogActions>
-                <Button color='primary' onClick={() => closeDialog()}>
+                <Button color='neutral' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
-                <Button color='primary' disabled={!(dialogContent.colorCode.length === 6 && dialogContent.name.length > 0 && dialogContent.price)} onClick={() => dialogContent.themeId ? updateTheme() : createTheme()}>
+                <Button color='primary' disabled={dialogContent.colorCode.length !== 6 || dialogContent.name.length === 0 || dialogContent.price.length === 0} onClick={() => dialogContent.themeId ? updateTheme() : createTheme()}>
                     Salvar
                 </Button>
             </DialogActions>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { doc, deleteDoc } from 'firebase/firestore';
-import { Container, Typography, IconButton, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper, Box, Tabs, Tab } from '@mui/material';
+import { Container, Typography, IconButton, Button, Table, TableHead, TableRow, TableCell, TableBody, TableContainer, Paper, Box, Tabs, Tab, Stack, Divider } from '@mui/material';
 import { Delete, Edit } from '@mui/icons-material';
 
 import ThemeDialog, { themeDialogDefaultContent } from '../../components/ThemeDialog';
@@ -33,7 +33,7 @@ function SettingsPage({ themes }) {
                                 <Typography gutterBottom variant='h6' style={{ margin: 16 }}>
                                     Temas
                                 </Typography>
-                                <Typography gutterBottom style={{ margin: 16 }}>
+                                <Typography style={{ margin: 16 }}>
                                     O nome e a cor dos temas não podem ser editados, pois são itens comercializados aos usuários da plataforma. Excluir um tema não o remove dos usuários que o adquiriram.
                                 </Typography>
                                 <Table>
@@ -66,13 +66,15 @@ function SettingsPage({ themes }) {
                                                     <TableCell>
                                                         R${theme.price.toFixed(2)}
                                                     </TableCell>
-                                                    <TableCell>
-                                                        <IconButton size='small' variant='contained' color='primary' onClick={() => setThemeDialogContent({ ...themeDialogContent, ...theme, themeId: theme.id, colorCode: theme.colorCode.substring(1), isOpen: true })} style={{ marginRight: 4 }}>
-                                                            <Edit />
-                                                        </IconButton>
-                                                        <IconButton size='small' variant='contained' color='secondary' onClick={() => setDeleteDialogContent({ ...deleteDialogContent, name: theme.name, onDelete: () => deleteTheme(theme.id), isOpen: true })}>
-                                                            <Delete />
-                                                        </IconButton>
+                                                    <TableCell style={{ width: '0%' }}>
+                                                        <Stack direction='row' justifyContent='flex-end' spacing={1} divider={<Divider flexItem orientation='vertical' />}>
+                                                            <IconButton size='small' variant='contained' color='primary' onClick={() => setThemeDialogContent({ ...themeDialogContent, ...theme, themeId: theme.id, colorCode: theme.colorCode.substring(1), isOpen: true })}>
+                                                                <Edit />
+                                                            </IconButton>
+                                                            <IconButton size='small' variant='contained' color='secondary' onClick={() => setDeleteDialogContent({ ...deleteDialogContent, name: theme.name, onDelete: () => deleteTheme(theme.id), isOpen: true })}>
+                                                                <Delete />
+                                                            </IconButton>
+                                                        </Stack>
                                                     </TableCell>
                                                 </TableRow>
                                             );
@@ -90,7 +92,7 @@ function SettingsPage({ themes }) {
                             <Typography gutterBottom variant='h6'>
                                 Sobre o desenvolvedor
                             </Typography>
-                            <Typography gutterBottom>
+                            <Typography>
                                 Em desenvolvimento.
                             </Typography>
                         </>

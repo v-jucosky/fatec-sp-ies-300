@@ -4,10 +4,11 @@ import { addDoc, collection, serverTimestamp } from '@firebase/firestore';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, MenuItem, Button } from '@mui/material';
 
 import { database } from '../../utils/settings/firebase';
+import { TILE_SIZES, DEFAULT_TILE_SIZE } from '../../utils/settings/app';
 
 const gameDialogDefaultContent = {
     name: '',
-    tileSize: '6',
+    tileSize: DEFAULT_TILE_SIZE,
     isOpen: false
 };
 
@@ -47,7 +48,7 @@ function GameDialog({ dialogContent, setDialogContent, auth }) {
                 Novo jogo
             </DialogTitle>
             <DialogContent>
-                <Typography gutterBottom style={{ marginBottom: 16 }}>
+                <Typography style={{ marginBottom: 16 }}>
                     Nomeie a partida e selecione o tamanho máximo das peças. O jogo padrão utiliza peças numeradas de 0 a 6; aumentar este valor irá resultar em um jogo mais longo.
                 </Typography>
                 <TextField
@@ -71,31 +72,17 @@ function GameDialog({ dialogContent, setDialogContent, auth }) {
                     value={dialogContent.tileSize}
                     onChange={(event) => setDialogContent({ ...dialogContent, tileSize: event.target.value })}
                 >
-                    <MenuItem value='6'>
-                        6
-                    </MenuItem>
-                    <MenuItem value='8'>
-                        8
-                    </MenuItem>
-                    <MenuItem value='10'>
-                        10
-                    </MenuItem>
-                    <MenuItem value='12'>
-                        12
-                    </MenuItem>
-                    <MenuItem value='14'>
-                        14
-                    </MenuItem>
-                    <MenuItem value='16'>
-                        16
-                    </MenuItem>
-                    <MenuItem value='18'>
-                        18
-                    </MenuItem>
+                    {TILE_SIZES.map(tileSize => {
+                        return (
+                            <MenuItem value={tileSize}>
+                                {tileSize}
+                            </MenuItem>
+                        );
+                    })}
                 </TextField>
             </DialogContent>
             <DialogActions>
-                <Button color='primary' onClick={() => closeDialog()}>
+                <Button color='neutral' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
                 <Button color='primary' disabled={dialogContent.name.length === 0} onClick={() => createGame()}>

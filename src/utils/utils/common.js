@@ -1,4 +1,4 @@
-function arrayUpdate(snapshot, array, setArray, index) {
+function arrayUpdate(snapshot, setArray, index) {
     snapshot.docChanges()
         .forEach(change => {
             if (change.type === 'added') {
@@ -25,7 +25,7 @@ function arrayUpdate(snapshot, array, setArray, index) {
         });
 };
 
-function objectUpdate(snapshot, object, setObject) {
+function objectUpdate(snapshot, setObject) {
     console.log('Updated object: ', snapshot.data());
 
     setObject(snapshot.data());

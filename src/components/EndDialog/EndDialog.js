@@ -19,12 +19,12 @@ function EndDialog({ dialogContent, setDialogContent }) {
                 Fim
             </DialogTitle>
             <DialogContent>
-                <Typography gutterBottom>
+                <Typography>
                     Esse jogo terminou.
                 </Typography>
             </DialogContent>
             <DialogActions>
-                <Button color='primary' onClick={() => closeDialog()}>
+                <Button color='neutral' onClick={() => closeDialog()}>
                     Cancelar
                 </Button>
                 <Button color='primary' onClick={() => pageHistory.push('/')}>

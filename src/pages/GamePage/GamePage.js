@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, updateDoc, onSnapshot, arrayUnion, arrayRemove, collection, query, where, increment, serverTimestamp, Timestamp } from 'firebase/firestore';
-import { Container, Grid, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, CardContent, CardActions, Tooltip } from '@mui/material';
+import { Container, Grid, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, CardContent, CardActions, Tooltip, Divider } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { Create, Add } from '@mui/icons-material';
 
@@ -90,7 +90,7 @@ function GamePage({ auth, profile, games }) {
                 setProfiles([]);
 
                 const unsubscribeProfiles = onSnapshot(query(collection(database, 'profiles'), where('userId', 'in', game.participantUserIds)), snapshot => {
-                    arrayUpdate(snapshot, profiles, setProfiles);
+                    arrayUpdate(snapshot, setProfiles);
                 });
 
                 return unsubscribeProfiles;
@@ -120,6 +120,17 @@ function GamePage({ auth, profile, games }) {
                 index = lastLeftMove.index - 1;
 
                 if (lastLeftMove.tile.left === currentMove.deckSelection.tile.right) {
+                    tile = currentMove.deckSelection.tile;
+                } else {
+                    tile = flipTile(currentMove.deckSelection.tile);
+                };
+            } else if (lastLeftMove.tile === lastRightMove.tile && lastLeftMove.tile.right === currentMove.deckSelection.number) {
+                // Caso excepcional: no 1º movimento (quando "lastLeftMove == lastRightMove"), há alguns casos em que só será possível
+                // prosseguir com o movimento através desta condição
+
+                index = lastLeftMove.index + 1;
+
+                if (lastLeftMove.tile.right === currentMove.deckSelection.tile.left) {
                     tile = currentMove.deckSelection.tile;
                 } else {
                     tile = flipTile(currentMove.deckSelection.tile);
@@ -242,7 +253,7 @@ function GamePage({ auth, profile, games }) {
                 <Typography gutterBottom variant='h4'>
                     {game.name}
                 </Typography>
-                <Typography gutterBottom style={{ marginBottom: 8 }}>
+                <Typography style={{ marginBottom: 8 }}>
                     ID do jogo: {game.id} | Criado por: {profiles.filter(profile => profile.userId === game.userId)[0]?.displayName}
                 </Typography>
                 {profiles.map(profile => {
@@ -260,7 +271,7 @@ function GamePage({ auth, profile, games }) {
                             <Typography gutterBottom variant='h6'>
                                 Painel do administrador
                             </Typography>
-                            <Typography gutterBottom>
+                            <Typography>
                                 Este painel só é visível a você, {profile.displayName}, por ter iniciado o jogo. Quando todos os jogadores entrarem, clique em “Iniciar” para iniciar o jogo.
                             </Typography>
                         </CardContent>
@@ -274,71 +285,46 @@ function GamePage({ auth, profile, games }) {
                         </CardActions>
                     </Card>
                 }
-                <Card style={{ marginTop: 16, marginBottom: 16 }}>
-                    <CardContent>
-                        <Typography gutterBottom variant='h6'>
-                            Deck
-                        </Typography>
-                        <Typography gutterBottom>
-                            {game.isOpen ?
-                                'Você receberá suas peças aqui quando o administrador do jogo iniciar a partida.'
-                                :
-                                'As peças ficarão disponíveis quando for a sua vez de jogar.'
-                            }
-                        </Typography>
-                    </CardContent>
-                    {!game.isOpen &&
-                        <CardActions style={{ overflowX: 'scroll', display: 'flex' }}>
-                            <Button color='primary' variant='contained' disabled={game.currentUserId !== auth.currentUser.uid} onClick={() => passTurn()}>
-                                Passar a vez
-                            </Button>
-                            {game.deckContent[auth.currentUser.uid]?.map(tile => {
-                                return (
-                                    <ButtonGroup color='primary' variant='contained' disabled={game.currentUserId !== auth.currentUser.uid}>
-                                        <Button color={currentMove.deckSelection.tile === tile && currentMove.deckSelection.number === tile.left ? 'secondary' : 'primary'} onClick={() => setCurrentMove({ ...currentMove, deckSelection: { tile: tile, number: tile.left } })}>
-                                            {tile.left.toString()}
-                                        </Button>
-                                        <Button color={currentMove.deckSelection.tile === tile && currentMove.deckSelection.number === tile.right ? 'secondary' : 'primary'} onClick={() => setCurrentMove({ ...currentMove, deckSelection: { tile: tile, number: tile.right } })}>
-                                            {tile.right.toString()}
-                                        </Button>
-                                    </ButtonGroup>
-                                );
-                            })}
-                        </CardActions>
-                    }
-                </Card>
-                <Card>
-                    <CardContent>
-                        <Typography gutterBottom variant='h6'>
-                            Tabuleiro
-                        </Typography>
-                        {game.isOpen &&
-                            <Typography gutterBottom>
-                                As peças aparecerão aqui conforme os jogadores fizerem suas jogadas.
-                            </Typography>
-                        }
-                    </CardContent>
-                    <CardActions style={{ overflowX: 'scroll', display: 'flex' }}>
-                        {game.moves.sort((a, b) => {
-                            return a.index - b.index;
-                        }).map(move => {
-                            return (
-                                <Tooltip arrow title={profiles.filter(profile => profile.userId === move.userId)[0]?.displayName || SYSTEM_PLAYER_DISPLAY_NAME}>
-                                    <ButtonGroup variant='contained' color={currentMove.gameSelection.tile === move.tile ? 'secondary' : 'primary'}>
-                                        <Button onClick={() => setCurrentMove({ ...currentMove, gameSelection: { tile: move.tile } })}>
-                                            {move.tile.left.toString()}
-                                        </Button>
-                                        <Button onClick={() => setCurrentMove({ ...currentMove, gameSelection: { tile: move.tile } })}>
-                                            {move.tile.right.toString()}
-                                        </Button>
-                                    </ButtonGroup>
-                                </Tooltip>
-                            );
-                        })}
-                    </CardActions>
-                </Card>
+                <div>
+                    <Button color='primary' variant='contained' disabled={!game.isRunning || game.currentUserId !== auth.currentUser.uid} onClick={() => passTurn()} style={{ marginTop: 8, marginBottom: 8 }}>
+                        Passar a vez
+                    </Button>
+                </div>
+                <div>
+                    {game.deckContent[auth.currentUser.uid]?.map(tile => {
+                        return (
+                            <ButtonGroup color='primary' variant='contained' orientation='vertical' disabled={!game.isRunning || game.currentUserId !== auth.currentUser.uid} style={{ marginTop: 8, marginBottom: 8, marginRight: 16 }}>
+                                <Button color={currentMove.deckSelection.tile === tile && currentMove.deckSelection.number === tile.left ? 'secondary' : 'primary'} onClick={() => setCurrentMove({ ...currentMove, deckSelection: { tile: tile, number: tile.left } })}>
+                                    {tile.left.toString()}
+                                </Button>
+                                <Button color={currentMove.deckSelection.tile === tile && currentMove.deckSelection.number === tile.right ? 'secondary' : 'primary'} onClick={() => setCurrentMove({ ...currentMove, deckSelection: { tile: tile, number: tile.right } })}>
+                                    {tile.right.toString()}
+                                </Button>
+                            </ButtonGroup>
+                        );
+                    })}
+                </div>
+                <Divider style={{ marginTop: 8, marginBottom: 8 }} />
+                {game.moves.sort((a, b) => {
+                    return a.index - b.index;
+                }).map(move => {
+                    return (
+                        <div style={{ textAlign: 'center' }}>
+                            <Tooltip arrow title={profiles.filter(profile => profile.userId === move.userId)[0]?.displayName || SYSTEM_PLAYER_DISPLAY_NAME}>
+                                <ButtonGroup variant='contained' orientation={move.tile.left === move.tile.right ? 'horizontal' : 'vertical'} color={currentMove.gameSelection.tile === move.tile ? 'secondary' : 'primary'} style={{ marginTop: 8, marginBottom: 8 }}>
+                                    <Button onClick={() => setCurrentMove({ ...currentMove, gameSelection: { tile: move.tile } })}>
+                                        {move.tile.left.toString()}
+                                    </Button>
+                                    <Button onClick={() => setCurrentMove({ ...currentMove, gameSelection: { tile: move.tile } })}>
+                                        {move.tile.right.toString()}
+                                    </Button>
+                                </ButtonGroup>
+                            </Tooltip>
+                        </div>
+                    );
+                })}
             </Container>
-            <Grid container justifyContent='flex-end' alignItems='center' spacing={2} style={{ position: 'absolute', bottom: 64, right: 64 }}>
+            <Grid container justifyContent='flex-end' alignItems='center' spacing={2} style={{ position: 'fixed', bottom: 64, right: 64 }}>
                 <Grid item>
                     <Fab variant='extended' color='primary' onClick={() => setMessageDialogContent({ ...messageDialogDefaultContent, isOpen: true })}>
                         <Create style={{ marginRight: 8 }} />
@@ -346,7 +332,7 @@ function GamePage({ auth, profile, games }) {
                     </Fab>
                 </Grid>
                 <Grid item>
-                    <Fab variant='extended' color='secondary' onClick={() => getTile()} disabled={game.sleepTiles.length === 0 || game.isOpen}>
+                    <Fab variant='extended' color='secondary' disabled={!game.isRunning || game.sleepTiles.length === 0} onClick={() => getTile()}>
                         <Add style={{ marginRight: 8 }} />
                         Dorme
                     </Fab>
