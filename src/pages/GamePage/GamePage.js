@@ -1,7 +1,7 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, updateDoc, onSnapshot, arrayUnion, arrayRemove, collection, query, where, increment, serverTimestamp, Timestamp } from 'firebase/firestore';
-import { Container, Grid, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, CardContent, CardActions, Tooltip, Divider } from '@mui/material';
+import { Container, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, CardContent, CardActions, Tooltip, Divider, Stack } from '@mui/material';
 import { useSnackbar } from 'notistack';
 import { Create, Add } from '@mui/icons-material';
 
@@ -103,8 +103,8 @@ function GamePage({ auth, profile, games }) {
             return a.index - b.index;
         });
 
-        const lastLeftMove = moves.at(0);
-        const lastRightMove = moves.at(-1);
+        const lastLeftMove = moves[0];
+        const lastRightMove = moves[moves.length - 1];
         const currentUserIdIndex = game.participantUserIds.indexOf(auth.currentUser.uid);
 
         if (moves.length === 0 || !currentMove.deckSelection.tile || !currentMove.gameSelection.tile) {
@@ -310,7 +310,7 @@ function GamePage({ auth, profile, games }) {
                 }).map(move => {
                     return (
                         <div style={{ textAlign: 'center' }}>
-                            <Tooltip arrow title={profiles.filter(profile => profile.userId === move.userId)[0]?.displayName || SYSTEM_PLAYER_DISPLAY_NAME}>
+                            <Tooltip arrow placement='right' title={profiles.filter(profile => profile.userId === move.userId)[0]?.displayName || SYSTEM_PLAYER_DISPLAY_NAME}>
                                 <ButtonGroup variant='contained' orientation={move.tile.left === move.tile.right ? 'horizontal' : 'vertical'} color={currentMove.gameSelection.tile === move.tile ? 'secondary' : 'primary'} style={{ marginTop: 8, marginBottom: 8 }}>
                                     <Button onClick={() => setCurrentMove({ ...currentMove, gameSelection: { tile: move.tile } })}>
                                         {move.tile.left.toString()}
@@ -324,20 +324,18 @@ function GamePage({ auth, profile, games }) {
                     );
                 })}
             </Container>
-            <Grid container justifyContent='flex-end' alignItems='center' spacing={2} style={{ position: 'fixed', bottom: 64, right: 64 }}>
-                <Grid item>
+            <div style={{ bottom: 64, right: 64, position: 'fixed' }}>
+                <Stack direction='row' spacing={2}>
                     <Fab variant='extended' color='primary' onClick={() => setMessageDialogContent({ ...messageDialogDefaultContent, isOpen: true })}>
                         <Create style={{ marginRight: 8 }} />
                         Mensagem
                     </Fab>
-                </Grid>
-                <Grid item>
                     <Fab variant='extended' color='secondary' disabled={!game.isRunning || game.sleepTiles.length === 0} onClick={() => getTile()}>
                         <Add style={{ marginRight: 8 }} />
                         Dorme
                     </Fab>
-                </Grid>
-            </Grid>
+                </Stack>
+            </div>
             <EndDialog
                 dialogContent={endDialogContent}
                 setDialogContent={setEndDialogContent}
