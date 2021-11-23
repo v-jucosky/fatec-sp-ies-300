@@ -7,7 +7,6 @@ import { database } from '../../utils/settings/firebase';
 
 const messageDialogDefaultContent = {
     content: '',
-    isAnonymous: false,
     isOpen: false
 };
 
@@ -22,7 +21,6 @@ function MessageDialog({ dialogContent, setDialogContent, auth }) {
         addDoc(collection(database, 'games', gameId, 'messages'), {
             userId: auth.currentUser.uid,
             content: dialogContent.content,
-            isAnonymous: dialogContent.isAnonymous,
             createTimestamp: serverTimestamp()
         }).then(document => {
             closeDialog();
@@ -49,17 +47,6 @@ function MessageDialog({ dialogContent, setDialogContent, auth }) {
                     rows={5}
                     value={dialogContent.content}
                     onChange={(event) => setDialogContent({ ...dialogContent, content: event.target.value })}
-                    style={{ marginBottom: 16 }}
-                />
-                <FormControlLabel
-                    label='Enviar como anônimo'
-                    control={
-                        <Switch
-                            color='primary'
-                            checked={dialogContent.isAnonymous}
-                            onChange={(event) => setDialogContent({ ...dialogContent, isAnonymous: event.target.checked })}
-                        />
-                    }
                 />
             </DialogContent>
             <DialogActions>

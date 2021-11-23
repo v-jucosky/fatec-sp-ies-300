@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { doc, updateDoc, onSnapshot, arrayUnion, arrayRemove, collection, query, where, increment, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { Container, Typography, Chip, Avatar, ButtonGroup, Button, Fab, Card, CardContent, CardActions, Tooltip, Divider, Stack } from '@mui/material';
@@ -40,30 +40,12 @@ function GamePage({ auth, profile, games }) {
                     if (change.type === 'added') {
                         let data = change.doc.data();
 
-                        if (data.isAnonymous) {
-                            enqueueSnackbar(data.content, {
-                                style: {
-                                    width: '200px',
-                                    wordBreak: 'break-all'
-                                }
-                            });
-                        } else {
-                            enqueueSnackbar(data.content, {
-                                action: (key) => {
-                                    return (
-                                        <Fragment>
-                                            <Typography variant='overline'>
-                                                {profiles.filter(profile => profile.userId === data.userId)[0]?.displayName}
-                                            </Typography>
-                                        </Fragment>
-                                    );
-                                },
-                                style: {
-                                    width: '200px',
-                                    wordBreak: 'break-all'
-                                }
-                            });
-                        };
+                        enqueueSnackbar(data.content, {
+                            style: {
+                                width: '200px',
+                                wordBreak: 'break-all'
+                            }
+                        });
                     };
                 });
         });
@@ -72,7 +54,7 @@ function GamePage({ auth, profile, games }) {
     }, []);
 
     useEffect(() => {
-        let game = games.filter(game => game.id === gameId)[0];
+        const game = games.filter(game => game.id === gameId)[0];
 
         if (game) {
             setGame(game);
