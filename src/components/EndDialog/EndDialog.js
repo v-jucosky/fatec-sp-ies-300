@@ -3,6 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, Button } from '@mui/material';
 
 const endDialogDefaultContent = {
+    isWinner: false,
     isOpen: false
 };
 
@@ -20,7 +21,7 @@ function EndDialog({ dialogContent, setDialogContent }) {
             </DialogTitle>
             <DialogContent>
                 <Typography>
-                    Esse jogo terminou.
+                    Esse jogo terminou. {dialogContent.isWinner ? 'Você venceu!' : 'Você perdeu.'}
                 </Typography>
             </DialogContent>
             <DialogActions>

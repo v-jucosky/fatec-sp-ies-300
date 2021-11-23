@@ -32,6 +32,7 @@ function GamePage({ auth, profile, games }) {
     const [currentMove, setCurrentMove] = useState(currentMoveDefaultValue);
     const [endDialogContent, setEndDialogContent] = useState(endDialogDefaultContent);
     const [messageDialogContent, setMessageDialogContent] = useState(messageDialogDefaultContent);
+    let unsubscribeProfiles = () => { return; };
 
     useEffect(() => {
         const unsubscribeMessages = onSnapshot(query(collection(database, 'games', gameId, 'messages'), where('createTimestamp', '>=', Timestamp.now())), snapshot => {
@@ -60,24 +61,26 @@ function GamePage({ auth, profile, games }) {
             setGame(game);
 
             if (!game.isRunning && !game.isOpen) {
-                setEndDialogContent({ ...endDialogContent, isOpen: true });
-
                 if (game.currentUserId === auth.currentUser.uid) {
+                    setEndDialogContent({ ...endDialogContent, winner: true, isOpen: true });
                     startConfetti();
                     setTimeout(stopConfetti, 10000);
+                } else {
+                    setEndDialogContent({ ...endDialogContent, winner: false, isOpen: true });
                 };
             };
 
             if (game.participantUserIds.length !== profiles.length) {
                 setProfiles([]);
+                unsubscribeProfiles();
 
-                const unsubscribeProfiles = onSnapshot(query(collection(database, 'profiles'), where('userId', 'in', game.participantUserIds)), snapshot => {
+                unsubscribeProfiles = onSnapshot(query(collection(database, 'profiles'), where('userId', 'in', game.participantUserIds)), snapshot => {
                     arrayUpdate(snapshot, setProfiles);
                 });
-
-                return unsubscribeProfiles;
             };
         };
+
+        return unsubscribeProfiles;
     }, [games]);
 
     useEffect(() => {
@@ -118,6 +121,7 @@ function GamePage({ auth, profile, games }) {
                     tile = flipTile(currentMove.deckSelection.tile);
                 };
             } else {
+                setCurrentMove(currentMoveDefaultValue);
                 return;
             };
         } else if (lastRightMove.tile === currentMove.gameSelection.tile) {
@@ -130,9 +134,11 @@ function GamePage({ auth, profile, games }) {
                     tile = flipTile(currentMove.deckSelection.tile);
                 };
             } else {
+                setCurrentMove(currentMoveDefaultValue);
                 return;
             };
         } else {
+            setCurrentMove(currentMoveDefaultValue);
             return;
         };
 
@@ -261,7 +267,7 @@ function GamePage({ auth, profile, games }) {
                             <Button color='primary' onClick={() => navigator.clipboard.writeText(gameId)}>
                                 Copiar ID
                             </Button>
-                            <Button color='primary' onClick={() => startGame()} disabled={!game.isOpen}>
+                            <Button color='primary' disabled={!game.isOpen || game.participantUserIds.length < 2} onClick={() => startGame()}>
                                 Iniciar
                             </Button>
                         </CardActions>

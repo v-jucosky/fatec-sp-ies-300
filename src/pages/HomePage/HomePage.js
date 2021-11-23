@@ -30,7 +30,7 @@ function HomePage({ auth, profile, games }) {
                         Jogos
                     </Typography>
                     <Typography style={{ margin: 16 }}>
-                        Continue seus jogos ou apage-os. Note que apagar um jogo tabém exclui o chat daquela partida.
+                        Continue seus jogos ou apage-os.
                     </Typography>
                     <Table>
                         <TableHead>
