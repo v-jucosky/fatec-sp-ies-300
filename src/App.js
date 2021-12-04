@@ -118,7 +118,7 @@ function App() {
                             <StorePage auth={auth} profile={profile} themes={themes} purchases={purchases} />
                         </Route>
                         <Route path='/jogo/:gameId'>
-                            <GamePage auth={auth} profile={profile} games={games} />
+                            <GamePage auth={auth} profile={profile} />
                         </Route>
                     </Switch>
                     <ProfileDialog
