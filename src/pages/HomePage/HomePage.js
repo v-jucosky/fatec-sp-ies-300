@@ -59,7 +59,7 @@ function HomePage({ auth, profile, games }) {
                         <TableBody>
                             {games.map(game => {
                                 return (
-                                    <TableRow>
+                                    <TableRow key={game.id}>
                                         <TableCell style={{ width: '0%' }}>
                                             {(game.currentUserId === auth.currentUser.uid && !game.isRunning && !game.isOpen) &&
                                                 <IconButton size='small' variant='contained' color='secondary'>

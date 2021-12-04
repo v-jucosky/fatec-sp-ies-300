@@ -56,7 +56,7 @@ function SettingsPage({ themes }) {
                                     <TableBody>
                                         {themes.map(theme => {
                                             return (
-                                                <TableRow>
+                                                <TableRow key={theme.id}>
                                                     <TableCell>
                                                         {theme.name}
                                                     </TableCell>

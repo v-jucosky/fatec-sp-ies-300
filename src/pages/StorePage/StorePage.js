@@ -22,7 +22,7 @@ function StorePage({ auth, profile, themes, purchases }) {
                 <Grid container spacing={3} style={{ marginBottom: 16 }}>
                     {themes.map(theme => {
                         return (
-                            <Grid item xs={6} md={3} style={{ display: 'flex' }}>
+                            <Grid item xs={6} md={3} key={theme.id} style={{ display: 'flex' }}>
                                 <Card style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'column', width: '100%' }}>
                                     <CardActionArea disabled={purchases.map(purchase => purchase.item.id).includes(theme.id)} onClick={() => setPurchaseDialogContent({ ...purchaseDialogContent, type: THEME, item: { ...theme }, isOpen: true })}>
                                         <CardContent>
@@ -55,7 +55,7 @@ function StorePage({ auth, profile, themes, purchases }) {
                     Adquira recursos e funcionalidades de jogo.
                 </Typography>
                 <Grid container spacing={3}>
-                    <Grid item xs={12} md={6} style={{ display: 'flex' }}>
+                    <Grid item xs={12} md={6} key={'highlightAvailableMoves'} style={{ display: 'flex' }}>
                         <Card style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'column', width: '100%' }}>
                             <CardContent>
                                 <Typography gutterBottom variant='h6'>
@@ -72,7 +72,7 @@ function StorePage({ auth, profile, themes, purchases }) {
                             </CardActions>
                         </Card>
                     </Grid>
-                    <Grid item xs={12} md={6} style={{ display: 'flex' }}>
+                    <Grid item xs={12} md={6} key={'messageSupport'} style={{ display: 'flex' }}>
                         <Card style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'column', width: '100%' }}>
                             <CardContent>
                                 <Typography gutterBottom variant='h6'>
