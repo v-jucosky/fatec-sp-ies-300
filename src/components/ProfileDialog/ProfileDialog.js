@@ -59,16 +59,18 @@ function ProfileDialog({ dialogContent, setDialogContent, auth, purchases }) {
                     onChange={(event) => setDialogContent({ ...dialogContent, accentColorCode: event.target.value })}
                     style={{ marginBottom: 16 }}
                 >
-                    <MenuItem value={DEFAULT_ACCENT_COLOR_CODE}>
+                    <MenuItem value={DEFAULT_ACCENT_COLOR_CODE} key={'defaultAccentColor'}>
                         Padrão
                     </MenuItem>
                     {purchases.map(purchase => {
                         if (purchase.type === THEME) {
                             return (
-                                <MenuItem value={purchase.item.colorCode}>
+                                <MenuItem value={purchase.item.colorCode} key={purchase.item.id}>
                                     {purchase.item.name}
                                 </MenuItem>
                             );
+                        } else {
+                            return null;
                         };
                     })}
                 </TextField>

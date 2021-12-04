@@ -74,7 +74,7 @@ function GameDialog({ dialogContent, setDialogContent, auth }) {
                 >
                     {TILE_SIZES.map(tileSize => {
                         return (
-                            <MenuItem value={tileSize}>
+                            <MenuItem value={tileSize} key={tileSize}>
                                 {tileSize}
                             </MenuItem>
                         );

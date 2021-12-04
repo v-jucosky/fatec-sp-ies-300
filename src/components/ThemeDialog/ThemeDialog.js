@@ -65,7 +65,7 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
                     id='name'
                     label='Nome'
                     variant='outlined'
-                    disabled={dialogContent.themeId}
+                    disabled={dialogContent.themeId ? true : false}
                     value={dialogContent.name}
                     onChange={(event) => setDialogContent({ ...dialogContent, name: event.target.value })}
                     style={{ marginBottom: 16 }}
@@ -76,7 +76,7 @@ function ThemeDialog({ dialogContent, setDialogContent }) {
                     id='code'
                     label='Código'
                     variant='outlined'
-                    disabled={dialogContent.themeId}
+                    disabled={dialogContent.themeId ? true : false}
                     value={dialogContent.colorCode}
                     onChange={(event) => setDialogContent({ ...dialogContent, colorCode: event.target.value })}
                     InputProps={{ startAdornment: <InputAdornment position='start'>#</InputAdornment> }}
